@@ -1,0 +1,30 @@
+Package: LINDAPlus
+Type: Package
+Title: An ILP formulation to infer inter- and intra-cellular molecular networks at a domain resolution.
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Enio",
+           family = "Gjerga",
+           role = c("cre", "aut"),
+           email = "enio.gjerga@gmail.com",
+           comment = c(ORCID = "0000-0001-8042-0395"))
+           )
+Description: A method that combines estimated Transcription Factor activities with Alternative Splicing analysis and prior knowledge of intra-cellular protein-protein, extracellular ligand-receptor and domain-domain interactions in order to infer inter- and intra- cellular protein regulatory networks.
+License: GPL-3
+Encoding: UTF-8
+LazyData: false
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 4.0.0)
+Imports:
+    readxl,
+    readr,
+    XML,
+    igraph,
+    rmarkdown,
+    aggregation,
+    qpdf
+biocViews: Network, GeneSetEnrichment, GeneTarget, NetworkEnrichment, AlternativeSplicing
+Suggests: 
+    knitr
+VignetteBuilder: knitr
