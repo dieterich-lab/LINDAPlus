@@ -29,11 +29,9 @@ Currently users can install LINDA directly from the source after downloading the
 ```R
 # directly from GitHub
 devtools::install_github("dieterich-lab/LINDAPlus", build_vignettes = FALSE)
-```
 
-```R
 # or download the source file from GitHub and install from source
-devtools::install_local(path = "path_to_extracted_LINDAPlus_directory", build_manual = TRUE, build_vignettes = TRUE, force = TRUE)
+devtools::install_local(path = "path_to_extracted_LINDAPlus_directory", build_manual = TRUE, build_vignettes = FALSE, force = TRUE)
 ```
 
 **NOTE:** If you wish for the the Vignettes to be built and for the test example to run successfully, please put the _cplex_ executable file under the /Downloads/ directory and **only** then you can set ```build_vignettes = TRUE```. In the case when building the vignettes is not possible, you can access it [here](https://github.com/dieterich-lab/LINDAPlus/blob/master/vignettes/LINDAPlus.html).
