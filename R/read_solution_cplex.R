@@ -1,5 +1,6 @@
 read_solution_cplex <- function(variables = variables,
                                 background.networks.list = background.networks.list,
+                                tf_scores = tf_scores,
                                 condition = 1){
   
   cplexSolutionFileName <- paste0("results_", condition, ".txt")
@@ -13,8 +14,8 @@ read_solution_cplex <- function(variables = variables,
   
   cells <- names(background.networks.list$background.networks)
   
-  cplexSolutionData <- xmlParse(cplexSolutionFileName)
-  cplexSolution <- xmlToList(cplexSolutionData)
+  cplexSolutionData <- XML::xmlParse(cplexSolutionFileName)
+  cplexSolution <- XML::xmlToList(cplexSolutionData)
   
   cplexSolutionIntAll <- list()
   cplexSolutionReacAll <- list()
@@ -189,10 +190,61 @@ read_solution_cplex <- function(variables = variables,
   }
   names(combined_solutions) <- c(cells, "ligand_receptors")
   
+  attributes <- list()
+  for(ii in 1:length(background.networks.list$background.networks)){
+    
+    nodes <- unique(c(background.networks.list$background.networks[[ii]]$pfam_source,
+                      background.networks.list$background.networks[[ii]]$pfam_target,
+                      background.networks.list$background.networks[[ii]]$gene_source,
+                      background.networks.list$background.networks[[ii]]$gene_target))
+    
+    mm <- matrix(data = , nrow = length(nodes), ncol = 2)
+    mm[, 1] <- nodes
+    mm[, 2] <- "protein"
+    
+    ind <- which(nodes%in%c(background.networks.list$background.networks[[ii]]$pfam_source,
+                            background.networks.list$background.networks[[ii]]$pfam_target))
+    if(length(ind) > 0){mm[ind, 2] <- "domain"}
+    
+    ind <- which(nodes%in%tf_scores[[ii]]$tf)
+    if(length(ind) > 0){mm[ind, 2] <- "tf"}
+    
+    ind <- which(nodes%in%background.networks.list$ligands.receptors$ligands)
+    if(length(ind) > 0){mm[ind, 2] <- "ligand"}
+    
+    ind <- which(nodes%in%background.networks.list$ligands.receptors$receptors)
+    if(length(ind) > 0){mm[ind, 2] <- "receptor"}
+    
+    mm <- mm[c(which(mm[, 2]=="receptor"), which(mm[, 2]=="protein"), 
+               which(mm[, 2]=="tf"), which(mm[, 2]=="ligand"), which(mm[, 2]=="domain")), ]
+    
+    colnames(mm) <- c("node", "attribute")
+    
+    attributes[[length(attributes)+1]] <- mm
+    
+  }
+  
+  lr <- combined_solutions$ligand_receptors
+  nodes <- unique(c(lr[, 1], lr[, 3]))
+  mm <- matrix(data = , nrow = length(nodes), ncol = 2)
+  mm[, 1] <- nodes
+  for(ii in 1:length(nodes)){
+    if(nodes[ii] %in% lr[, 1]){
+      mm[ii, 2] <- "ligand"
+    } else {
+      mm[ii, 2] <- "receptor"
+    }
+  }
+  colnames(mm) <- c("node", "attribute")
+  attributes[[length(attributes)+1]] <- mm
+  
+  names(attributes) <- c(names(background.networks.list$background.networks), "ligand-receptors")
+  
   res <- list()
   res[[length(res)+1]] <- combined_solutions
   res[[length(res)+1]] <- separate_solutions
-  names(res) <- c("combined_solutions", "separate_solutions")
+  res[[length(res)+1]] <- attributes
+  names(res) <- c("combined_solutions", "separate_solutions", "node_attributes")
   
   return(res)
   

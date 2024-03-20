@@ -21,7 +21,8 @@ cleanupILP <- function(condition=condition){
   }
   
   AllFiles <- list.files()
-  CloneFiles <- which(grepl(pattern = "clone",x = AllFiles,fixed = TRUE))
+  CloneFiles <- intersect(x = which(grepl(pattern = "clone",x = AllFiles,fixed = TRUE)), 
+                          y = which(grepl(pattern = ".log",x = AllFiles,fixed = TRUE)))
   if (length(CloneFiles)>0) {
     for (counter in seq_len(length(CloneFiles))) {
       file.remove(AllFiles[CloneFiles[counter]])

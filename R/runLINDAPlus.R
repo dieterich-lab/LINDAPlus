@@ -45,19 +45,19 @@
 #'function - TF inclusion. This penalty factor is suggested to be set to a
 #'higher value compared to other penalty parameters in order to strongly
 #'penalize the inclusion of not signifcantly regulated TF's. By default,
-#'lambda1=100.
+#'alpha=10.
 #'
 #'
 #'@param beta the penalization terms of the secondary objective of the
 #'objective function - size penalty. The aim of this objective term is to
 #'penalize the inclusion of spurious DDI's in the final solution. By default,
-#'lambda1=1.
+#'beta=5.
 #'
 #'
 #'@param gamma the penalization terms of the secondary objective of the
 #'objective function - size penalty. The aim of this objective term is to
 #'penalize the inclusion of spurious DDI's in the final solution. By default,
-#'lambda1=1.
+#'gamma=0.1.
 #'
 #'
 #'@param mipgap CPLEX parameter which sets an absolute tolerance on the gap

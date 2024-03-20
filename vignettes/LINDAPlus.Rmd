@@ -60,7 +60,6 @@ R-packages needed to for the analysis.
 
 ```{r, message=FALSE}
 library(LINDAPlus)
-library(XML)
 ```
 
 ### 2. Loading of a list object containing prior knowledge of joint intra-cellular PPI-DDI's and extra-cellular L-R pairs
@@ -161,3 +160,8 @@ L-R pairs (```res$combined_solutions$ligand_receptors```). In **Figure 3** the
 optimal network as visualized from a protein level is provided.
 
 ![**Figure 3:** LINDA+ results. With solid lines are depicted the inferred interactions and the weight corresponds to the number of solutions that a given interaction appears while with gray lines are depicted the interactions which do not appear to be functional.](./vignettes_pictures/bg_toy_opt.jpeg){width=100%}
+Users can additionally check for the type/attributes of each node component in the generated networks. This would help for further visualization of the networks through [Cytoscape](https://cytoscape.org/) or through the [LINDAvis](https://github.com/dieterich-lab/) R-shiny App (under development).
+
+```{r, message=FALSE}
+print(res$node_attributes)
+```
