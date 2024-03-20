@@ -67,17 +67,17 @@ the path to the cplex solver is set to: solverPath = "/usr/bin/cplex".}
 function - TF inclusion. This penalty factor is suggested to be set to a
 higher value compared to other penalty parameters in order to strongly
 penalize the inclusion of not signifcantly regulated TF's. By default,
-lambda1=100.}
+alpha=10.}
 
 \item{beta}{the penalization terms of the secondary objective of the
 objective function - size penalty. The aim of this objective term is to
 penalize the inclusion of spurious DDI's in the final solution. By default,
-lambda1=1.}
+beta=5.}
 
 \item{gamma}{the penalization terms of the secondary objective of the
 objective function - size penalty. The aim of this objective term is to
 penalize the inclusion of spurious DDI's in the final solution. By default,
-lambda1=1.}
+gamma=0.1.}
 
 \item{mipgap}{CPLEX parameter which sets an absolute tolerance on the gap
 between the best integer objective and the objective of the best node

@@ -77,6 +77,7 @@ computeILP <- function(variables = variables,
   
   sif <- read_solution_cplex(variables = variables,
                              background.network = background.networks.list,
+                             tf_scores = tf_scores,
                              condition = condition)
   
   cleanupILP(condition = condition)
