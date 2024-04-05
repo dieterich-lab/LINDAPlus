@@ -56,52 +56,7 @@ library(LINDAPlus)
 A documentation of the current version of the main _runLINDAPlus()_ function can be obtained by simply typing ```?runLINDAPlus``` in R once the package has been installed.
 
 ## Examples
-Below we provide the codes about running a test toy example (assuming that the _cplex_ solver has been stored in ```"~/Downloads/cplex"```) after calling for the _lindaPlus_ package by using the default optimization parameter settings of the _runLINDAPlus()_ function:
+Examples have been provided on the vignettes of the package which can be
+accessed [here](https://github.com/dieterich-lab/LINDAPlus/blob/master/vignettes/LINDAPlus.html) or by typing ```vignette("LINDAPlus")``` in the ```R``` console.
 
-```R
-load(file = system.file("extdata", "toy.background.networks.list.RData", package = "LINDAPlus")) #backgroud network for each cell-type + ligands&receptors objects 
-load(file = system.file("extdata", "toy.ligand.scores.RData", package = "LINDAPlus")) #ligand scores
-load(file = system.file("extdata", "toy.tf.scores.RData", package = "LINDAPlus")) #TF scores for each cell-type
-load(file = system.file("extdata", "toy.top.tf.RData", package = "LINDAPlus")) #The number of TF's to consider as top-regulated for each cell-type
-
-res <- runLINDAPlus(background.networks.list = background.networks.list, 
-                    ligand.scores = ligand_scores, 
-                    tf.scores = tf_scores, 
-                    solverPath = "~/Downloads/cplex", 
-                    top = top)
-
-# Show the combined table of inferred inter-cellular Ligand-Receptors interactions
-res$combined_solutions$ligand_receptors
-
-# Show the combined table of inferred intra-cellular PPI's for CellA 
-res$combined_solutions$CellA
-
-# Show the combined table of inferred intra-cellular PPI's for CellB
-res$combined_solutions$CellB
-```
-
-Alternatively users can expand on the gap tolerance and/or the diversity of solutions to report in order to obtain a wider spectrum of alternative solutions.
-```R
-load(file = system.file("extdata", "toy.background.networks.list.RData", package = "LINDAPlus")) #backgroud network for each cell-type + ligands&receptors objects 
-load(file = system.file("extdata", "toy.ligand.scores.RData", package = "LINDAPlus")) #ligand scores
-load(file = system.file("extdata", "toy.tf.scores.RData", package = "LINDAPlus")) #TF scores for each cell-type
-load(file = system.file("extdata", "toy.top.tf.RData", package = "LINDAPlus")) #The number of TF's to consider as top-regulated for each cell-type
-
-res <- runLINDAPlus(background.networks.list = background.networks.list, 
-                     ligand.scores = ligand_scores, 
-                     tf.scores = tf_scores, 
-                     solverPath = "~/Downloads/cplex", 
-                     top = top, 
-                     mipgap = 0.01, 
-                     relgap = 0.01, 
-                     replace = 2)
-
-# Show the combined table of inferred inter-cellular Ligand-Receptors interactions
-res$combined_solutions$ligand_receptors
-
-# Show the combined table of inferred intra-cellular PPI's for CellA 
-res$combined_solutions$CellA
-
-# Show the combined table of inferred intra-cellular PPI's for CellB
-res$combined_solutions$CellB
-```
+**This package is an ongoing work and it is currently being updated**
