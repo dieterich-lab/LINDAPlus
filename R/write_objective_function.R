@@ -1,21 +1,25 @@
 write_objective_function <- function(variables = variables,
                                      background.networks.list = background.networks.list,
-                                     tf_scores = tf_scores,
-                                     ligand_scores = ligand_scores,
-                                     alpha = 10,
-                                     beta = 5,
-                                     gamma = 0.1){
+                                     tf.scores = tf.scores,
+                                     ligand.scores = ligand.scores,
+                                     lr.scores = lr.scores,
+                                     ccc.scores = ccc.scores,
+                                     lambda1 = lambda1, 
+                                     lambda2 = lambda2, 
+                                     lambda3 = lambda3,
+                                     lambda4 = lambda4){
   
   print("Writing the objective function and constraints.
         This might take a bit of time..")
   
-  cells <- names(tf_scores)
+  cells <- names(tf.scores)
+  background.network.list <- background.networks.list$background.networks
   
   of1 <- ""
   for(kk in 1:length(cells)){
     
     # Write main objective - Minimizing the TF scores
-    input.scores <- tf_scores[[kk]]
+    input.scores <- tf.scores[[kk]]
     tfNodes <- input.scores$tf
     idx <- which(variables$var_exp%in%paste0(cells[kk], ":node ", tfNodes))
     if(length(idx)==0){
@@ -34,13 +38,13 @@ write_objective_function <- function(variables = variables,
           
           if(input.scores$score[ii]==0){
             objective.function <- paste0(objective.function,
-                                         alpha,
+                                         lambda1,
                                          " ",
                                          variables$var[idx])
           } else {
             objective.function <- paste0(objective.function,
                                          "- ",
-                                         alpha,
+                                         lambda1,
                                          " ",
                                          variables$var[idx])
           }
@@ -51,13 +55,13 @@ write_objective_function <- function(variables = variables,
           if(input.scores$score[ii]==0){
             objective.function <- paste0(objective.function,
                                          " + ",
-                                         alpha,
+                                         lambda1,
                                          " ",
                                          variables$var[idx])
           } else {
             objective.function <- paste0(objective.function,
                                          " - ",
-                                         alpha,
+                                         lambda1,
                                          " ",
                                          variables$var[idx])
           }
@@ -73,32 +77,72 @@ write_objective_function <- function(variables = variables,
   }
   
   # The secondary Ligands Objective Function
-  topLigands <- ligand_scores$ligand[which(ligand_scores$score==1)]
-  penLigands <- ligand_scores$ligand[which(ligand_scores$score==0)]
-  of2 <- ""
-  ofLigands <- c(topLigands, penLigands)
-  for(ii in 1:length(ofLigands)){
+  if(is.null(ligand.scores)){
     
-    if(ofLigands[ii]%in%topLigands){
-      of2 <- paste0(of2, " - ", beta, " ", variables$var[which(variables$var_exp==paste0("LR:ligand ", ofLigands[ii]))])
-    }
+    of2 <- ""
     
-    if(ofLigands[ii]%in%penLigands){
-      of2 <- paste0(of2, " + ", beta, " ", variables$var[which(variables$var_exp==paste0("LR:ligand ", ofLigands[ii]))])
+  } else {
+    
+    topLigands <- ligand.scores$ligand[which(ligand.scores$score==1)]
+    penLigands <- ligand.scores$ligand[which(ligand.scores$score==0)]
+    of2 <- ""
+    ofLigands <- c(topLigands, penLigands)
+    for(ii in 1:length(ofLigands)){
+      
+      if(ofLigands[ii]%in%topLigands){
+        of2 <- paste0(of2, " - ", lambda2, " ", variables$var[which(variables$var_exp==paste0("LR:ligand ", ofLigands[ii]))])
+      }
+      
+      if(ofLigands[ii]%in%penLigands){
+        of2 <- paste0(of2, " + ", lambda2, " ", variables$var[which(variables$var_exp==paste0("LR:ligand ", ofLigands[ii]))])
+      }
+      
     }
     
   }
   objective.function <- paste0(of1, of2)
   
-  # Write third objective - size penalty factor
+  
+  # Third LR objective function
+  if((is.null(lr.scores)) && (is.null(ccc.scores))){
+    
+    of3 <- ""
+    
+  } else {
+    
+    of3 <- ""
+    cc <- c()
+    for(ii in 1:length(background.network.list)){
+      
+      df <- background.network.list[[ii]]
+      ind <- which(df$pfam_source=="PSEUDODOMAIN")
+      varvar <- c()
+      for(jj in 1:length(ind)){
+        
+        varvar <- c(varvar, variables$var[which(variables$var_exp==paste0(names(background.network.list)[ii], 
+                                                                          ":interaction ", 
+                                                                          df$gene_source[ind[jj]], 
+                                                                          "=", 
+                                                                          df$gene_target[ind[jj]]))])
+      }
+      of3 <- paste0((1-df$weight[ind])*lambda3, " ", varvar, collapse = " + ")
+      cc <- c(cc, of3)
+      
+    }
+    
+    objective.function <- paste0(objective.function, paste0(cc, collapse = "+ "))
+    
+  }
+  
+  # Write fourth objective - size penalty factor
   idx <- which(grepl(pattern = ":domain ", x = variables$var_exp, fixed = TRUE))
-  if(gamma>0){
-    obj <- paste0(" + ", gamma, " ", variables$var[idx])
+  if(lambda4>0){
+    obj <- paste0(" + ", lambda4, " ", variables$var[idx])
     obj <- paste0(obj, collapse = "")
     objective.function <- paste0(objective.function, obj)
   } else {
-    if(gamma<0){
-      obj <- paste0(" - ", abs(gamma), " ", variables$var[idx])
+    if(lambda4<0){
+      obj <- paste0(" - ", abs(lambda4), " ", variables$var[idx])
       obj <- paste0(obj, collapse = "")
       objective.function <- paste0(objective.function, obj)
     }

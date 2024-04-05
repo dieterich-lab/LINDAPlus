@@ -1,6 +1,6 @@
 write_constraints_5 <- function(variables = variables,
                                 background.networks.list = background.networks.list,
-                                tf_scores = tf_scores){
+                                tf.scores = tf.scores){
   
   constraints <- c()
   
@@ -25,7 +25,7 @@ write_constraints_5 <- function(variables = variables,
       idx2 <- which(paste0(background.networks.list$background.networks[[jj]]$gene_source, 
                            "=",
                            background.networks.list$background.networks[[jj]]$gene_target) %in% 
-                      paste0(tf_scores[[jj]]$tf, "=", all_ligands[ii]))
+                      paste0(tf.scores[[jj]]$tf, "=", all_ligands[ii]))
       if((length(idx1)==1) && (length(idx2)>0)){
         vv <- c(vv, var[idx1])
       }
@@ -48,7 +48,7 @@ write_constraints_5 <- function(variables = variables,
       var <- variables$var[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
       var_exp <- variables$var_exp[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
       
-      intint <- paste0(cell_types[jj], ":interaction ", tf_scores[[jj]]$tf, "=", all_ligands[ii])
+      intint <- paste0(cell_types[jj], ":interaction ", tf.scores[[jj]]$tf, "=", all_ligands[ii])
       
       idx1 <- which(var_exp==paste0(cell_types[jj], ":node ", all_ligands[ii]))
       idx2 <- which(var_exp %in% intint)

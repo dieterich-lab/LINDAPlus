@@ -125,7 +125,6 @@
 #' library(XML)
 #'
 #' load(file = system.file("extdata", "toy.background.networks.list.RData", package = "LINDAPlus"))
-#' load(file = system.file("extdata", "toy.ligand.scores.RData", package = "LINDAPlus"))
 #' load(file = system.file("extdata", "toy.tf.scores.RData", package = "LINDAPlus"))
 #' load(file = system.file("extdata", "toy.top.tf.RData", package = "LINDAPlus"))
 #'
@@ -139,13 +138,16 @@
 #' @export
 
 runLINDAPlus <- function(background.networks.list = background.networks.list,
-                         ligand.scores = ligand.scores,
                          tf.scores = tf.scores,
+                         lr.scores = NULL,
+                         ligand.scores = NULL,
+                         ccc.scores = NULL,
                          solverPath = "/usr/bin/cplex",
-                         top = top,
-                         alpha = 10,
-                         beta = 5,
-                         gamma = 0.1,
+                         top.tf = NULL,
+                         lambda1 = 10,
+                         lambda2 = 15,
+                         lambda3 = 1,
+                         lambda4 = 0.1,
                          mipgap = 0,
                          relgap = 0,
                          populate = 500,
@@ -162,11 +164,14 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   all_inputs <- checkInputs(background.networks.list = background.networks.list,
                             ligand.scores = ligand.scores,
                             tf.scores = tf.scores,
+                            lr.scores = lr.scores,
                             solverPath = solverPath,
-                            top = top,
-                            alpha = alpha,
-                            beta = beta,
-                            gamma = gamma,
+                            top.tf = top.tf, 
+                            ccc.scores = ccc.scores,
+                            lambda1 = lambda1,
+                            lambda2 = lambda2, 
+                            lambda3 = lambda3, 
+                            lambda4 = lambda4,
                             mipgap = mipgap,
                             relgap = relgap,
                             populate = populate,
@@ -178,14 +183,18 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                             condition = condition,
                             save_res = save_res)
   
+  
   background.networks.list <- all_inputs$background.networks.list
-  ligand.scores <- all_inputs$ligand.scores
   tf.scores <- all_inputs$tf.scores
+  lr.scores <- all_inputs$lr.scores
+  ligand.scores <- all_inputs$ligand.scores
+  ccc.scores <- all_inputs$ccc.scores
   solverPath <- all_inputs$solverPath
-  top <- all_inputs$top
-  alpha <- all_inputs$alpha
-  beta <- all_inputs$beta
-  gamma <- all_inputs$gamma
+  top.tf <- all_inputs$top.tf
+  lambda1 <- all_inputs$lambda1
+  lambda2 <- all_inputs$lambda2
+  lambda3 <- all_inputs$lambda3
+  lambda4 <- all_inputs$lambda4
   mipgap <- all_inputs$mipgap
   relgap <- all_inputs$relgap
   populate <- all_inputs$populate
@@ -197,14 +206,17 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   condition <- all_inputs$condition
   save_res <- all_inputs$save_res
   
-  background.networks.list <- process_background_network(background.networks.list = background.networks.list)
+  
+  background.networks.list <- process_background_network(background.networks.list = background.networks.list, 
+                                                         tf.scores = tf.scores, lr.scores = lr.scores, ccc.scores = ccc.scores)
   variables <- create_variables(background.networks.list = background.networks.list)
   
   res <- computeILP(variables = variables, background.networks.list = background.networks.list, 
-                    tf_scores = tf.scores, ligand_scores = ligand.scores, alpha = alpha, 
-                    beta = beta, gamma = gamma, condition = condition, solverPath = solverPath, 
-                    mipgap = mipgap, relgap = relgap, intensity = intensity, populate = populate, 
-                    nSolutions = nSolutions, replace = replace, threads = threads, timelimit = timelimit)
+                    tf.scores = tf.scores, ligand.scores = ligand.scores, lr.scores = lr.scores, 
+                    ccc.scores = ccc.scores, lambda1 = lambda1, lambda2 = lambda2, lambda3 = lambda3, 
+                    lambda4 = lambda4, condition = condition, solverPath = solverPath, mipgap = mipgap, 
+                    relgap = relgap, intensity = intensity, populate = populate, nSolutions = nSolutions, 
+                    replace = replace, threads = threads, timelimit = timelimit)
   
   if(save_res){
     save(res, file = paste0("res_", condition, ".RData"))

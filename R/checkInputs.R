@@ -1,11 +1,14 @@
 checkInputs <- function(background.networks.list = background.networks.list,
-                        ligand.scores = ligand.scores,
                         tf.scores = tf.scores,
+                        lr.scores = lr.scores,
+                        ligand.scores = ligand.scores,
+                        ccc.scores = ccc.scores,
                         solverPath = solverPath,
-                        top = top,
-                        alpha = alpha,
-                        beta = beta,
-                        gamma = gamma,
+                        top.tf = top.tf,
+                        lambda1 = lambda1,
+                        lambda2 = lambda2,
+                        lambda3 = lambda3,
+                        lambda4 = lambda4,
                         mipgap = mipgap,
                         relgap = relgap,
                         populate = populate,
@@ -82,60 +85,204 @@ checkInputs <- function(background.networks.list = background.networks.list,
     
   }
   
-  if((!is.numeric(top)) ||
-     (length(intersect(x = names(top), y = names(background.networks.list$background.networks)))<length(top))){
+  if(is.null(top.tf)){
     
-    stop("Error: The 'top' parameter should be a named numeric vector with cell-types given as names. Please check your inputs.")
+    warning("WARNING: You did not provide the number of significant TF's for each
+            cell-type. All provided TF's for each cell-type will be considered
+            as significant.")
+    
+    top.tf <- rep(1, length(tf.scores))
+    for(ii in 1:length(tf.scores)){
+      top.tf[ii] <- nrow(tf.scores[[ii]])
+    }
+    
+    names(top.tf) <- names(tf.scores)
     
   } else {
     
-    temp <- list()
-    for(ii in 1:length(top)){
+    if((!is.numeric(top.tf)) ||
+       (length(intersect(x = names(top.tf), y = names(background.networks.list$background.networks)))<length(top.tf))){
       
-      curr <- tf.scores[[which(names(tf.scores)==names(top)[ii])]]
+      stop("Error: The 'top.tf' parameter should be a named numeric vector with cell-types given as names. Please check your inputs.")
       
-      if(top[ii] > nrow(curr)){
+    } else {
+      
+      temp <- list()
+      for(ii in 1:length(top.tf)){
         
-        warning(paste0("WARNING: There a re more given top TF's for cell-type ",
-                       names(top)[ii], " than there are TF's given. All the given
+        curr <- tf.scores[[which(names(tf.scores)==names(top.tf)[ii])]]
+        
+        if(top.tf[ii] > nrow(curr)){
+          
+          warning(paste0("WARNING: There a re more given top TF's for cell-type ",
+                         names(top.tf)[ii], " than there are TF's given. All the given
                        TF's will be considered as significant."))
+          
+          curr$score <- 1
+          temp[[length(temp)+1]] <- curr
+          
+        } else {
+          
+          curr <- curr[order(abs(as.numeric(curr$score)), decreasing = TRUE), ]
+          curr$score <- 0
+          curr$score[1:top.tf[ii]] <- 1
+          temp[[length(temp)+1]] <- curr
+          
+        }
         
-        curr$score <- 1
-        temp[[length(temp)+1]] <- curr
+      }
+      names(temp) <- names(top.tf)
+      tf.scores <- temp
+      
+    }
+    
+  }
+  
+  if(!is.null(ccc.scores)){
+    
+    if(class(ccc.scores) != "data.frame"){
+      
+      stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
+           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
+           NULL (default). Please check on your inputs.")
+      
+    } else {
+      
+      cc <- intersect(x = colnames(ccc.scores), y = c("ccc", "score"))
+      if(length(cc) < 2){
+        
+        stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
+           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
+           NULL (default). Please check on your inputs.")
         
       } else {
         
-        curr <- curr[order(abs(as.numeric(curr$score)), decreasing = TRUE), ]
-        curr$score <- 0
-        curr$score[1:top[ii]] <- 1
-        temp[[length(temp)+1]] <- curr
+        if((class(ccc.scores$ccc) != "character") || 
+           (class(ccc.scores$score) != "numeric")){
+          
+          stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
+           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
+           NULL (default). Please check on your inputs.")
+          
+        } else {
+          
+          cell_types <- unique(unlist(strsplit(x = ccc.scores$ccc, split = "=", fixed = TRUE)))
+          scores <- ccc.scores$score
+          
+          cc <- intersect(x = cell_types, y = names(background.networks.list$background.networks))
+          if(length(cc) < length(background.networks.list$background.networks)){
+            
+            stop("ERROR: You should provide cell-cell communication probability 
+                 scores for each pair of cell-types present in the system 
+                 separated by a '=' symbol (i.e. 'CellA=CellB'). Please
+                 check your inputs.")
+            
+          }
+          
+          if(!((all(scores >= 0)) && all(scores <= 1))){
+            
+            stop("ERROR: You should provide cell-cell communication probability 
+                 scores for each pair of cell-types present in the system 
+                 as numerical values between 0 and 1. Please check your inputs.")
+            
+          }
+          
+        }
         
       }
       
     }
-    names(temp) <- names(top)
-    tf.scores <- temp
     
   }
   
-  if(!is.numeric(alpha)){
+  if(!is.null(lr.scores)){
     
-    warning("The 'alpha' parameter should be numeric. We are setting to the default alpha=10.")
-    alpha <- 10
+    if((class(lr.scores) != "list") ||
+       (length(intersect(x = names(lr.scores), y = names(background.networks.list$background.networks))) < length(background.networks.list$background.networks))){
+      
+      stop("ERROR: The provided 'lr.scores' object should be a named list (by 
+            cell-types) of data-frames with colnames 'lr.interaction' (character) 
+            and 'score' (numerical) or set to NULL (default). Please check on 
+            your inputs.")
+      
+    } else {
+      
+      for(ii in 1:length(lr.scores)){
+        
+        cc <- intersect(x = colnames(lr.scores[[ii]]), y = c("lr.interaction", "score"))
+        if(length(cc) < 2){
+          
+          stop("ERROR: The provided 'lr.scores' object should be a named list (by 
+            cell-types) of data-frames with colnames 'lr.interaction' (character) 
+            and 'score' (numerical) or set to NULL (default). Please check on 
+            your inputs.")
+          
+        } else {
+          
+          if((class(lr.scores[[ii]]$lr.interaction) != "character") || 
+             (class(lr.scores[[ii]]$score) != "numeric")){
+            
+            stop(paste0("ERROR: The provided 'lr.scores' for cell-type ", names(background.networks.list)[ii], 
+                 " object should be either a data-frame with colnames 'lr.interaction' 
+                 (character) and 'score' (numerical) or set to NULL (default). 
+                 Please check on your inputs."))
+            
+          } else {
+            
+            scores <- lr.scores[[ii]]$score
+            
+            cc <- which(grepl(pattern = "=", x = lr.scores[[ii]]$lr.interaction, fixed = TRUE))
+            if(length(cc) < 1){
+              
+              stop("ERROR: You should provide LR enrichment scores for pairs of 
+                    ligand-receptor interactions incoming on each cell-type 
+                    separated by a '=' symbol. Please check your inputs.")
+              
+            }
+            
+            if(!((all(scores >= -1)) && all(scores <= 1))){
+              
+              stop("ERROR: You should provide LR enrichment scores ffor pairs of 
+                    ligand-receptor interactions incoming on each cell-type 
+                    as numerical values between -1 and 1. Please check your inputs.")
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+    }
     
   }
   
-  if(!is.numeric(beta)){
+  if(!is.numeric(lambda1)){
     
-    warning("The 'beta' parameter should be numeric. We are setting to the default beta=5.")
-    beta <- 5
+    warning("The 'lambda1' parameter should be numeric. We are setting to the default lambda1=10.")
+    lambda1 <- 10
     
   }
   
-  if(!is.numeric(gamma)){
+  if(!is.numeric(lambda2)){
     
-    warning("The 'gamma' parameter should be numeric. We are setting to the default beta=0.1.")
-    gamma <- 0.1
+    warning("The 'lambda2' parameter should be numeric. We are setting to the default lambda2=5.")
+    lambda2 <- 5
+    
+  }
+  
+  if(!is.numeric(lambda3)){
+    
+    warning("The 'lambda3' parameter should be numeric. We are setting to the default lambda3=1.")
+    lambda3 <- 1
+    
+  }
+  
+  if(!is.numeric(lambda4)){
+    
+    warning("The 'lambda4' parameter should be numeric. We are setting to the default lambda4=0.1.")
+    lambda4 <- 0.1
     
   }
   
@@ -237,13 +384,16 @@ checkInputs <- function(background.networks.list = background.networks.list,
   
   all_inputs <- list()
   all_inputs$background.networks.list = background.networks.list
-  all_inputs$ligand.scores = ligand.scores
   all_inputs$tf.scores = tf.scores
+  all_inputs$ligand.scores = ligand.scores
+  all_inputs$lr.scores = lr.scores
+  all_inputs$ccc.scores = ccc.scores
   all_inputs$solverPath = solverPath
-  all_inputs$top = top
-  all_inputs$alpha = alpha
-  all_inputs$beta = beta
-  all_inputs$gamma = gamma
+  all_inputs$top.tf = top.tf
+  all_inputs$lambda1 = lambda1
+  all_inputs$lambda2 = lambda2
+  all_inputs$lambda3 = lambda3
+  all_inputs$lambda4 = lambda4
   all_inputs$mipgap = mipgap
   all_inputs$relgap = relgap
   all_inputs$populate = populate

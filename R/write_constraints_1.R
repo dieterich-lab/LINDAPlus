@@ -6,6 +6,8 @@ write_constraints_1 <- function(variables = variables,
   receptors <- background.networks.list$ligands.receptors$receptors
   ligands <- background.networks.list$ligands.receptors$ligands
   
+  background.network.list <- background.networks.list$background.networks
+  
   # There should be at least one Receptor activated on each cell
   cell_types <- names(background.networks.list$background.networks)
   
@@ -97,6 +99,38 @@ write_constraints_1 <- function(variables = variables,
       
     }
     
+  }
+  
+  
+  # If there are joint receptors, then all of the proteins which they consist
+  # of should be activated
+  cc4 <- c()
+  cc5 <- c()
+  for(ii in 1:length(background.network.list)){
+    
+    idx <- which(grepl(pattern = "|", x = background.network.list[[ii]]$gene_source, fixed = TRUE))
+    if(length(idx) > 0){
+      
+      complex_receptor <- unique(background.network.list[[ii]]$gene_source[idx])
+      for(jj in 1:length(complex_receptor)){
+        
+        proteins <- unique(unlist(strsplit(x = complex_receptor[jj], split = "|", fixed = TRUE)))
+        ind1 <- which(variables$var_exp==paste0(names(background.network.list)[ii], ":node ", complex_receptor[jj]))
+        ind2 <- which(variables$var_exp%in%paste0(names(background.network.list)[ii], ":node ", proteins))
+        
+        tmp1 <- paste0(paste0(variables$var[ind2], collapse = " + "), " - ", length(ind2)-1, " ", variables$var[ind1], " >= 0")
+        tmp2 <- paste0(paste0(variables$var[ind2], collapse = " + "), " - ", length(ind2)-1, " ", variables$var[ind1], " <= ", length(ind2)-1)
+        
+        cc4 <- c(cc4, tmp1)
+        cc5 <- c(cc5, tmp2)
+        
+      }
+      
+    }
+    
+  }
+  if((length(cc4) > 0) && (length(cc5) > 0)){
+    constraints <- c(constraints, unique(cc4), unique(cc5))
   }
   
   

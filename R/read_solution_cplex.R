@@ -1,6 +1,6 @@
 read_solution_cplex <- function(variables = variables,
                                 background.networks.list = background.networks.list,
-                                tf_scores = tf_scores,
+                                tf.scores = tf.scores,
                                 condition = 1){
   
   cplexSolutionFileName <- paste0("results_", condition, ".txt")
@@ -30,8 +30,12 @@ read_solution_cplex <- function(variables = variables,
     for(jj in 1:length(currSolution)){
       mm[jj, 1] <- currSolution[[jj]][1]
       mm[jj, 2] <- currSolution[[jj]][3]
-      mm[jj, 3] <- variables$var_exp[which(variables$var==currSolution[[jj]][1])]
+      ind <- which(variables$var==currSolution[[jj]][1])
+      if(length(ind) > 0){
+        mm[jj, 3] <- variables$var_exp[which(variables$var==currSolution[[jj]][1])]
+      }
     }
+    mm <- mm[complete.cases(mm), ]
     
     varvar <- unlist(lapply(currSolution, '[', 1))
     valval <- as.numeric(unlist(lapply(currSolution, '[', 3)))
@@ -206,7 +210,7 @@ read_solution_cplex <- function(variables = variables,
                             background.networks.list$background.networks[[ii]]$pfam_target))
     if(length(ind) > 0){mm[ind, 2] <- "domain"}
     
-    ind <- which(nodes%in%tf_scores[[ii]]$tf)
+    ind <- which(nodes%in%tf.scores[[ii]]$tf)
     if(length(ind) > 0){mm[ind, 2] <- "tf"}
     
     ind <- which(nodes%in%background.networks.list$ligands.receptors$ligands)
