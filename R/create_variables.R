@@ -30,6 +30,7 @@ create_variables <- function(background.networks.list = background.networks.list
     
   }
   
+  
   #
   cc3 <- c()
   cc3Exp <- c()
@@ -43,6 +44,7 @@ create_variables <- function(background.networks.list = background.networks.list
     cc3Exp <- c(cc3Exp, paste0(names(background.network.list)[ii], ":node ", nodes))
     
   }
+  
   
   #
   cc4 <- c()
@@ -69,6 +71,7 @@ create_variables <- function(background.networks.list = background.networks.list
     
   }
   
+  
   #
   cc5 <- c()
   cc5Exp <- c()
@@ -84,6 +87,7 @@ create_variables <- function(background.networks.list = background.networks.list
     cc5Exp <- c(cc5Exp, paste0(names(background.network.list)[ii], ":dist ", nodes))
     
   }
+  
   
   #
   cnt <- 1
@@ -116,35 +120,36 @@ create_variables <- function(background.networks.list = background.networks.list
   cc6Exp <- paste0("LR:", c(receptors, ligands, receptors_domains, ligands_domains, reactions, interactions))
   cc6 <- paste0("lr", 1:length(cc6Exp))
   
+  
   #
   cc <- c(cc1, cc2, cc3, cc4, cc5, cc6)
   ccExp <- c(cc1Exp, cc2Exp, cc3Exp, cc4Exp, cc5Exp, cc6Exp)
-  idx2rem <- c()
-  for(ii in 1:length(background.network.list)){
-    
-    reacs <- paste0(background.network.list[[ii]]$gene_source[which(background.network.list[[ii]]$gene_source%in%background.networks.list$ligands.receptors$ligands)],
-                    "=",
-                    background.network.list[[ii]]$gene_target[which(background.network.list[[ii]]$gene_target%in%background.networks.list$ligands.receptors$receptors)])
-    
-    if(length(reacs) > 0){
-      
-      for(jj in 1:length(reacs)){
-        
-        ind <- intersect(x = which(grepl(pattern = paste0(names(background.network.list)[ii], ":"), x = ccExp, fixed = TRUE)), 
-                         y = which(grepl(pattern = reacs[jj], x = ccExp, fixed = TRUE)))
-        
-        idx2rem <- c(idx2rem, ind)
-        
-      }
-      
-    }
-    
-  }
-  
-  if(length(idx2rem) > 0){
-    cc <- cc[-idx2rem]
-    ccExp <- ccExp[-idx2rem]
-  }
+  # idx2rem <- c()
+  # for(ii in 1:length(background.network.list)){
+  #   
+  #   reacs <- paste0(background.network.list[[ii]]$gene_source[which(background.network.list[[ii]]$gene_source%in%background.networks.list$ligands.receptors$ligands)],
+  #                   "=",
+  #                   background.network.list[[ii]]$gene_target[which(background.network.list[[ii]]$gene_target%in%background.networks.list$ligands.receptors$receptors)])
+  #   
+  #   if(length(reacs) > 0){
+  #     
+  #     for(jj in 1:length(reacs)){
+  #       
+  #       ind <- intersect(x = which(grepl(pattern = paste0(names(background.network.list)[ii], ":"), x = ccExp, fixed = TRUE)), 
+  #                        y = which(grepl(pattern = reacs[jj], x = ccExp, fixed = TRUE)))
+  #       
+  #       idx2rem <- c(idx2rem, ind)
+  #       
+  #     }
+  #     
+  #   }
+  #   
+  # }
+  # 
+  # if(length(idx2rem) > 0){
+  #   cc <- cc[-idx2rem]
+  #   ccExp <- ccExp[-idx2rem]
+  # }
   
   
   variables <- list()

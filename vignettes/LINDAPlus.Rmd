@@ -14,10 +14,10 @@ of directed joint interactions (protein-protein and Domain-Domain intra-cellular
 interactions from DIGGER (Louadi et al. 2021)) as well as structurally resolved 
 ligand-receptor pairs from various resources (list of resources when ready) with 
 estimated transcription factor enzymatic activities from DoRothEA 
-(Garcia-Alonso et al. 2019) based on sc-RNAseq reads and abundances of secreted 
-extra-cellular proteins from Secretomics data analysis. This is achieved by 
-contextualising large-scale prior knowledge of joint interactions from 
-sequencing and MS/MS data in order to identify a subset of functional 
+(Garcia-Alonso et al. 2019) based on sc-RNAseq reads and optionally abundances 
+of secreted extra-cellular proteins from Secretomics data analysis. This is 
+achieved by contextualising large-scale prior knowledge of joint interactions 
+from sequencing and MS/MS data in order to identify a subset of functional 
 interactions between proteins and their domains through the implementation of an 
 Integer Linear Programming (ILP) formulation. The pipeline of the LINDA+ 
 methodology has been depicted in **Figure 1**.
@@ -27,11 +27,11 @@ methodology has been depicted in **Figure 1**.
 
 ## The inputs of the method consist of the following:
 
-**1.**	From the DoRothEA (Garcia-Alonso et al., 2018) resource, normalized TF 
-enrichment scores (NESs) can be estimated with viper (Shen et al. 2014; 
-Alvarez et al. 2016). Based on their activities, the most regulated TF’s can 
-then be used as the bottom layer of signalling from where we reverse-engineer 
-the upstream regulatory interactions.
+**1.**	From the DoRothEA (Garcia-Alonso et al., 2018) resource, normalized 
+transcription factor (TF) enrichment scores (NESs) can be estimated with viper 
+(Shen et al. 2014; Alvarez et al. 2016). Based on their activities, the most 
+regulated TF’s can then be used as the bottom layer of signalling from where we 
+reverse-engineer the upstream regulatory interactions.
 
 **2.**	Abundances of ligands obtained from LC-MS secretomics. TBD: How to use
 secretomics data as inputs.
@@ -53,7 +53,25 @@ Below are provided examples which help the user to better understand the
 functioning of the LINDA+ R-package and the format of the LINDA+ inputs.
 
 ## Toy Example
-Below are provided the steps of running a small Toy test study.
+Below are provided the steps of running a small Toy test study which we have
+depicted in **Figure 2**. In this Toy case-study we are depicting a system of
+3 different cell-types (CellA, CellB and CellC) where each node represents a
+protein (domains not depicted) while edges represent interactions between nodes.
+Yellow triangles represent cell-receptors, red squares represent intra-cellular
+proteins, green triangles represent TF's, while in blue circles we are depicting
+ligands in the extra-cellular space. The interactions between nodes in the 
+network is what we have obtained from utilizing large-scale resources such as
+DIGGER for the intra-cellular PPI and DDI's (Louadi et al. 2021); DoRothEA 
+(Garcia-Alonso et al., 2018) for the TF-to-ligand interactions which connect the 
+intra-cellular space with the extra-cellular space; and resources such as
+LIANA+ (Dimitrov et al. 2023) or CellPhoneDB (Efremova et al. 2020) that we use
+as prior knowledge for the ligand-receptor interactions.
+
+![**Figure 2:** LINDA+  Toy Example](./vignettes_pictures/lindaplus_toy.jpeg){width=100%}
+
+Please not that for simplicity reasons in **Figure 2** we are depicting each 
+protein as one node in the network, however LINDA+ models interactions between 
+proteins at a domain resolution.
 
 ### 1. Loading of the required packages
 R-packages needed to for the analysis.
@@ -82,8 +100,11 @@ load(file = system.file("extdata", "toy.background.networks.list.RData", package
 print(background.networks.list)
 ```
 
+Please note that receptors that that consist of multi-subunit protein complexes 
+(i.e. 2 or more protein units), should be depicted as separated through '|'
+symbol (i.e. receptor complex 'A1|A2' which consists of proteins A1 and A2).
 
-### 3. Loading of TF activity scores for each cell-type
+### 3. Loading of TF activity scores for each cell-type and Analysis
 This information should be provided as a named list (for each cell-type) and
 which contains data-frames indicating the enrichment scores for each TF at each
 cell-type. The data-frames should contain at least two columns: 'tf' 
@@ -92,7 +113,7 @@ scores for each TF).
 
 ```{r, warning=FALSE}
 load(file = system.file("extdata", "toy.tf.scores.RData", package = "LINDAPlus"))
-print(tf_scores)
+print(tf.scores)
 ```
 
 Additionally users can provide a named (also by cell-type) numerical 
@@ -103,11 +124,28 @@ be considered as significantly regulated.
 
 ```{r, warning=FALSE}
 load(file = system.file("extdata", "toy.top.tf.RData", package = "LINDAPlus"))
-print(top)
+print(top.tf)
 ```
 
+In principle, to run LINDA+, users do not necessairly need to provide prior
+information about receptors or ligand-receptor interactions that appear to be
+regulated or enriched. LINDA+ can such potentially regulated mechanisms from
+the provided TF activities alone:
 
-### 4. Loading of Ligand scores
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores, 
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf)
+
+print(res$combined_solutions)
+```
+
+In **Figure 3**, is depicted the network solution provided by LINDA+.
+
+![**Figure 3:** LINDA+ Toy Example - Solution 1](./vignettes_pictures/lindaplus_toy1.jpeg){width=100%}
+
+### 4. Loading of Ligand scores and Analysis
 Users can provide information about the abundance of ligands in the 
 extra-cellular space as made evident by Secretomics data through a data-frame
 object. More abundant ligands/extra-cellular molecules are more likely to 
@@ -115,51 +153,113 @@ initiate conformational changes in receptors. The data-frame provided should
 contain two columns: 'ligands' (providing the ligand ID's) and 'score' 
 (providing the score associated to each ligand, i.e. abundance). The higher the
 score of the ligand, the more likely it will be for a ligand to appear in the
-solution.
+solution. In this case, we penalize the inclusion of ligand L3 in the solution
+(lower score value given).
 
 ```{r, warning=FALSE}
 load(file = system.file("extdata", "toy.ligand.scores.RData", package = "LINDAPlus"))
-print(ligand_scores)
-```
+print(ligand.scores)
 
-
-
-In **Figure 2** is provided a depiction of the Toy case background network 
-(showing only the proteins) for two cell-types (CellA and CellB). Nodes 
-representing significantly regulated ligands and TF's have been depicted with
-red border. 
-
-![**Figure 2:** Background Network depiction of the Toy case study](./vignettes_pictures/bg_toy.jpeg){width=100%}
-
-### 5. LINDA+ Analysis
-Once the inputs are available, the users can the proceed with the LINDA+ 
-network analysis. The regulatory networks can be inferred by executing the 
-```runLINDAPlus()``` function. Details about how to use this function can be 
-obtained by using the ```?runLINDAPlus``` command.
-
-Below is shown an example of how we can use the ```runLINDAPlus()``` function given
-the inputs from the toy example as well as making use of the default
-CPLEX optimization parameters.
-
-```{r, message=FALSE}
 res <- runLINDAPlus(background.networks.list = background.networks.list, 
-                    ligand.scores = ligand_scores, 
-                    tf.scores = tf_scores, 
+                    tf.scores = tf.scores, 
                     solverPath = "~/Downloads/cplex", 
-                    top = top)
+                    top.tf = top.tf, 
+                    ligand.scores = ligand.scores, 
+                    lambda1 = 10, 
+                    lambda2 = 15)
 
 print(res$combined_solutions)
 ```
 
-The output of the analysis is a list object containing the separate LINDA+ 
-analysis optimal networks (```res$separate_solutions```) as well as matrices
-containing all the integrated interactions obtained from each of the separate
-solutions for CellA (```res$combined_solutions$CellA```), CellB
-(```res$combined_solutions$CellB```) and interactions between cells through the
-L-R pairs (```res$combined_solutions$ligand_receptors```). In **Figure 3** the
-optimal network as visualized from a protein level is provided.
 
-![**Figure 3:** LINDA+ results. With solid lines are depicted the inferred interactions and the weight corresponds to the number of solutions that a given interaction appears while with gray lines are depicted the interactions which do not appear to be functional.](./vignettes_pictures/bg_toy_opt.jpeg){width=100%}
+In **Figure 4** we depict how giving a priority of ligand L4 in the solution
+over ligand L3, will lead to the re-wring of the interaction in our
+multi-cellular system as compared to when not considering for such scores in
+**Figure 3**.
+
+Users can tweak the parameters lambda1 and lambda2 to define for how much they
+wish to prioritize the inclusion of TF's over the significantly expressed 
+ligands in the extra-cellular space. Here we are using the default set values of
+lambda1=10 and lambda2=15.
+
+![**Figure 4:** LINDA+ Toy Example - Solution 2](./vignettes_pictures/lindaplus_toy2.jpeg){width=100%}
+
+### 5. Loading of Ligand-Receptor enrichment scores and Analysis
+In the case when Secretomics data is not available, users may still have 
+evidence of functional ligand-receptor interactions. This evidence can come from 
+previous ligand-enrichment analyses. In such cases, users can integrate the 
+enrichment scores for ligand-receptor pairs into LINDA. Doing so helps guide the 
+network inference towards the desired ligand-receptor interactions. In this case
+users can provide a named list (for each cell-type) of data-frames consisting
+of ligand-receptor enrichment scores normalized between the values of -1 and 1.
+
+```{r, warning=FALSE}
+load(file = system.file("extdata", "toy.lr.scores.RData", package = "LINDAPlus"))
+print(lr.scores)
+```
+Here we can see that for example, for CellA we are prioritizing the L4->A3
+interaction compared to L2->A1|A2. This is reflected in the re-wiring of the
+interactions compared to the solution that we obtained in **Figure 2** as
+follows:
+
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores, 
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf, 
+                    lr.scores = lr.scores,
+                    lambda1 = 10, 
+                    lambda3 = 1)
+
+print(res$combined_solutions)
+```
+
+
+![**Figure 5:** LINDA+ Toy Example - Solution 3](./vignettes_pictures/lindaplus_toy3.jpeg){width=100%}
+We also observe that for CellB while indeed we have provided a higher enrichment 
+score to the L4->B2 interaction compared L3->B1, we still see that L4->B2 is not
+present in the final solution. This is because we are assigning a relatively low
+weight (lambda3=1) to the inclusion of ligand-receptor interactions based on
+enrichment analyses compared to the inclusion of TF's (lambda1=10). By giving
+larger value to lambda3, we can make it possible to retreive the L4->B2 
+interaction.
+
+
+### 6. Loading of Cell-Cell Communication scores and Analysis
+Users can additionally provide scores (between 0 and 1) representing probability 
+values about how likely would be for two cell-types to directly communicate with 
+each-other (i.e. as made evident through spatial transcriptomics). The higher 
+the score given, the more is likely for a cell-type pair to be directly 
+communicating with each other, and when such score is set to 0, then special
+constraints will make it so these two cell-types would not be able to directly
+communicate with each-other. Let's see how such scores can be provided:
+
+```{r, warning=FALSE}
+load(file = system.file("extdata", "toy.ccc.scores.RData", package = "LINDAPlus"))
+print(ccc.scores)
+```
+From the example given, we can see that we have set that the probability of
+communicating between CellA and CellB is set to 0. **Figure 6** depicts how
+providing such scores affects the network solution:
+
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores, 
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf, 
+                    ccc.scores = ccc.scores,
+                    lambda1 = 10, 
+                    lambda3 = 1)
+
+print(res$combined_solutions)
+```
+
+![**Figure 6:** LINDA+ Toy Example - Solution 4](./vignettes_pictures/lindaplus_toy4.jpeg){width=100%}
+As we can notice, all the extra-cellular interactions which make possible the
+communication between CellA and CellC are not present in the solution.
+
+
+### 7. Visualization
 Users can additionally check for the type/attributes of each node component in the generated networks. This would help for further visualization of the networks through [Cytoscape](https://cytoscape.org/) or through the [LINDAvis](https://github.com/dieterich-lab/) R-shiny App (under development).
 
 ```{r, message=FALSE}

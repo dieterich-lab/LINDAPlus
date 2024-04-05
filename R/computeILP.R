@@ -1,28 +1,34 @@
 computeILP <- function(variables = variables, 
                        background.networks.list = background.networks.list, 
-                       tf_scores = tf_scores, 
-                       ligand_scores = ligand_scores, 
-                       alpha = 10, 
-                       beta = 20, 
-                       gamma = 0.1,
-                       condition = 1,
+                       tf.scores = tf.scores, 
+                       ligand.scores = ligand.scores,
+                       lr.scores = lr.scores,
+                       ccc.scores = ccc.scores,
+                       lambda1 = lambda1, 
+                       lambda2 = lambda2, 
+                       lambda3 = lambda3,
+                       lambda4 = lambda4,
+                       condition = condition,
                        solverPath = solverPath,
-                       mipgap = 0.05,
-                       relgap = 0.05,
-                       intensity = 2,
-                       populate = 1000,
-                       nSolutions = 100,
-                       replace = 1,
-                       threads = 0,
-                       timelimit = 3600){
+                       mipgap = mipgap,
+                       relgap = relgap,
+                       intensity = intensity,
+                       populate = populate,
+                       nSolutions = nSolutions,
+                       replace = replace,
+                       threads = threads,
+                       timelimit = timelimit){
   
   objective.function <- write_objective_function(variables = variables, 
                                                  background.networks.list = background.networks.list, 
-                                                 tf_scores = tf_scores, 
-                                                 ligand_scores = ligand_scores, 
-                                                 alpha = alpha, 
-                                                 beta = beta, 
-                                                 gamma = gamma)
+                                                 tf.scores = tf.scores, 
+                                                 ligand.scores = ligand.scores,
+                                                 lr.scores = lr.scores,
+                                                 ccc.scores = ccc.scores,
+                                                 lambda1 = lambda1, 
+                                                 lambda2 = lambda2, 
+                                                 lambda3 = lambda3,
+                                                 lambda4 = lambda4)
   
   c1 <- write_constraints_1(variables = variables, 
                             background.networks.list = background.networks.list)
@@ -34,10 +40,12 @@ computeILP <- function(variables = variables,
                             background.networks.list = background.networks.list)
   c5 <- write_constraints_5(variables = variables, 
                             background.networks.list = background.networks.list, 
-                            tf_scores = tf_scores)
-  c6 <- write_loop_constraints(variables = variables, 
+                            tf.scores = tf.scores)
+  c6 <- write_constraints_6(variables = variables, 
+                            background.networks.list = background.networks.list)
+  c7 <- write_loop_constraints(variables = variables, 
                                background.networks.list = background.networks.list)
-  allC <- unique(c(c1, c2, c3, c4, c5, c6))
+  allC <- unique(c(c1, c2, c3, c4, c5, c6, c7))
   
   bounds <- write_bounds(variables = variables)
   binaries <- write_binaries(variables = variables)
@@ -76,8 +84,8 @@ computeILP <- function(variables = variables,
                    condition = condition)
   
   sif <- read_solution_cplex(variables = variables,
-                             background.network = background.networks.list,
-                             tf_scores = tf_scores,
+                             background.networks.list = background.networks.list,
+                             tf.scores = tf.scores,
                              condition = condition)
   
   cleanupILP(condition = condition)
