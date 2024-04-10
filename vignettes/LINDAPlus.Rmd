@@ -259,7 +259,51 @@ As we can notice, all the extra-cellular interactions which make possible the
 communication between CellA and CellC are not present in the solution.
 
 
-### 7. Visualization
+### 7. Splice Effects
+Given that LINDA+ simultaneously infers not only protein-protein interactions 
+but also domain interactions, it enables us to examine how RNA modification 
+mechanisms, like alternative splicing, might influence the presence or absence 
+of domains within the structure of interacting proteins. This, in turn, allows 
+us to assess the effects of such modifications on the interactions between 
+proteins.
+
+This is achieved by giving to the network inference function an ```as.input```
+data-frame object which lists domain ID's of certain proteins for any cell-type
+and how they have been affected based on, for example, evidence from 
+differential splicing analyses. These effects can include exclusion (when we 
+know that a domain of a protein has been skipped) or inclusion (when we try to 
+understand how the inclusion of a domain in the network solution might affect
+the protein interactions).
+
+In the toy example below it can be demonstrated how the ```as.input``` object 
+should be defined.
+
+```{r, warning=FALSE}
+load(file = system.file("extdata", "toy.as.input.RData", package = "LINDAPlus"))
+print(as.input)
+```
+
+Such an object, can then be given as an input to the main ```runLINDAPlus()``` 
+function in order to infer splice-dependent mechanisms of protein interactions.
+
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores,
+                    as.input = as.input,
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf)
+
+print(res$combined_solutions)
+```
+
+In the figure below we can see how the addition of information about included or
+excluded protein domains affects the re-wiring of the protein interactions.
+
+![**Figure 7:** LINDA+ Toy Example - Solution 5](./vignettes_pictures/lindaplus_toy5.jpeg){width=100%}
+
+
+
+### 8. Visualization
 Users can additionally check for the type/attributes of each node component in the generated networks. This would help for further visualization of the networks through [Cytoscape](https://cytoscape.org/) or through the [LINDAvis](https://github.com/dieterich-lab/) R-shiny App (under development).
 
 ```{r, message=FALSE}

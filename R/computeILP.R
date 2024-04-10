@@ -4,6 +4,7 @@ computeILP <- function(variables = variables,
                        ligand.scores = ligand.scores,
                        lr.scores = lr.scores,
                        ccc.scores = ccc.scores,
+                       as.input = as.input,
                        lambda1 = lambda1, 
                        lambda2 = lambda2, 
                        lambda3 = lambda3,
@@ -43,9 +44,12 @@ computeILP <- function(variables = variables,
                             tf.scores = tf.scores)
   c6 <- write_constraints_6(variables = variables, 
                             background.networks.list = background.networks.list)
-  c7 <- write_loop_constraints(variables = variables, 
+  c7 <- write_constraints_7(variables = variables, 
+                            background.networks.list = background.networks.list, 
+                            as.input = as.input)
+  c8 <- write_loop_constraints(variables = variables, 
                                background.networks.list = background.networks.list)
-  allC <- unique(c(c1, c2, c3, c4, c5, c6, c7))
+  allC <- unique(c(c1, c2, c3, c4, c5, c6, c7, c8))
   
   bounds <- write_bounds(variables = variables)
   binaries <- write_binaries(variables = variables)
