@@ -142,6 +142,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                          lr.scores = NULL,
                          ligand.scores = NULL,
                          ccc.scores = NULL,
+                         as.input = NULL,
                          solverPath = "/usr/bin/cplex",
                          top.tf = NULL,
                          lambda1 = 10,
@@ -168,6 +169,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                             solverPath = solverPath,
                             top.tf = top.tf, 
                             ccc.scores = ccc.scores,
+                            as.input = as.input,
                             lambda1 = lambda1,
                             lambda2 = lambda2, 
                             lambda3 = lambda3, 
@@ -189,6 +191,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   lr.scores <- all_inputs$lr.scores
   ligand.scores <- all_inputs$ligand.scores
   ccc.scores <- all_inputs$ccc.scores
+  as.input <- all_inputs$as.input
   solverPath <- all_inputs$solverPath
   top.tf <- all_inputs$top.tf
   lambda1 <- all_inputs$lambda1
@@ -213,10 +216,11 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   
   res <- computeILP(variables = variables, background.networks.list = background.networks.list, 
                     tf.scores = tf.scores, ligand.scores = ligand.scores, lr.scores = lr.scores, 
-                    ccc.scores = ccc.scores, lambda1 = lambda1, lambda2 = lambda2, lambda3 = lambda3, 
-                    lambda4 = lambda4, condition = condition, solverPath = solverPath, mipgap = mipgap, 
-                    relgap = relgap, intensity = intensity, populate = populate, nSolutions = nSolutions, 
-                    replace = replace, threads = threads, timelimit = timelimit)
+                    ccc.scores = ccc.scores, as.input = as.input, lambda1 = lambda1, 
+                    lambda2 = lambda2, lambda3 = lambda3, lambda4 = lambda4, condition = condition, 
+                    solverPath = solverPath, mipgap = mipgap, relgap = relgap, intensity = intensity, 
+                    populate = populate, nSolutions = nSolutions, replace = replace, threads = threads, 
+                    timelimit = timelimit)
   
   if(save_res){
     save(res, file = paste0("res_", condition, ".RData"))

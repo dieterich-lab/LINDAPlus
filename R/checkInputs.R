@@ -5,6 +5,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
                         ccc.scores = ccc.scores,
                         solverPath = solverPath,
                         top.tf = top.tf,
+                        as.input = as.input,
                         lambda1 = lambda1,
                         lambda2 = lambda2,
                         lambda3 = lambda3,
@@ -25,7 +26,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
      (length(background.networks.list)!= 2) || 
      (length(intersect(x = names(background.networks.list), y = c("background.networks", "ligands.receptors")))<2)){
     
-    stop("Error: Object 'background.networks.list' should be a list with a length of 2 named 'background.networks' and 'ligands.receptors'. Please check your inputs.")
+    stop("Object 'background.networks.list' should be a list with a length of 2 named 'background.networks' and 'ligands.receptors'. Please check your inputs.")
     
   } else {
     
@@ -37,7 +38,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
     for(ii in 1:length(obj1)){cc <- c(cc, class(obj1[[ii]]))}
     if((is.null(names(obj1))) ||
        all(cc != "data.frame")){
-      stop("Error: The 'background.networks' should be named data-frames. Please check your inputs.")
+      stop("The 'background.networks' should be named data-frames. Please check your inputs.")
     } else {
       
       for(ii in 1:length(obj1)){
@@ -45,9 +46,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
         df <- obj1[[ii]]
         if(length(intersect(x = colnames(df), y = c("pfam_source", "pfam_target", "gene_source", "gene_target")))<4){
           
-          stop("Error: The 'background.network' object should be a data-frame with at least 4
-              columns and have at lease c('pfam_source', 'pfam_target', 
-              'gene_source', 'gene_target') as column ID's. Please check your inputs.")
+          stop("The 'background.network' object should be a data-frame with at least 4 columns and have at lease c('pfam_source', 'pfam_target', 'gene_source', 'gene_target') as column ID's. Please check your inputs.")
         }
         
       }
@@ -58,7 +57,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
     for(ii in 1:length(obj2)){cc <- c(cc, class(obj2[[ii]]))}
     if(length(intersect(x = names(obj2), y = c("ligands", "receptors")))<2 ||
        all(cc != "character")){
-      stop("Error: The 'ligands.receptors' should be a list of characters with a length of 2 named 'ligands' and 'receptors'. Please check your inputs.")
+      stop("The 'ligands.receptors' should be a list of characters with a length of 2 named 'ligands' and 'receptors'. Please check your inputs.")
     }
     
   }
@@ -69,27 +68,21 @@ checkInputs <- function(background.networks.list = background.networks.list,
      (length(tf.scores)!= length(background.networks.list$background.networks)) || 
      (length(intersect(x = names(background.networks.list$background.networks), y = names(tf.scores)))!=length(tf.scores))){
     
-    stop("Error: The 'tf.scores' object should be a list of data-frames with the 
-         same length and named the same as the 'background.networks.list$background.networks' 
-         object. Please check your inputs.")
+    stop("The 'tf.scores' object should be a list of data-frames with the same length and named the same as the 'background.networks.list$background.networks' object. Please check your inputs.")
     
   } else {
     
     cc <- c()
     for(ii in 1:length(tf.scores)){cc <- c(cc, class(tf.scores[[ii]]))}
     if(all(cc != "data.frame")){
-      stop("Error: The 'tf.scores' object should be a list of data-frames with the 
-           same length and named the same as the 'background.networks.list$background.networks' 
-           object. Please check your inputs.")
+      stop("The 'tf.scores' object should be a list of data-frames with the same length and named the same as the 'background.networks.list$background.networks' object. Please check your inputs.")
     }
     
   }
   
   if(is.null(top.tf)){
     
-    warning("WARNING: You did not provide the number of significant TF's for each
-            cell-type. All provided TF's for each cell-type will be considered
-            as significant.")
+    warning("You did not provide the number of significant TF's for each cell-type. All provided TF's for each cell-type will be considered as significant.")
     
     top.tf <- rep(1, length(tf.scores))
     for(ii in 1:length(tf.scores)){
@@ -103,7 +96,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
     if((!is.numeric(top.tf)) ||
        (length(intersect(x = names(top.tf), y = names(background.networks.list$background.networks)))<length(top.tf))){
       
-      stop("Error: The 'top.tf' parameter should be a named numeric vector with cell-types given as names. Please check your inputs.")
+      stop("The 'top.tf' parameter should be a named numeric vector with cell-types given as names. Please check your inputs.")
       
     } else {
       
@@ -114,9 +107,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
         
         if(top.tf[ii] > nrow(curr)){
           
-          warning(paste0("WARNING: There a re more given top TF's for cell-type ",
-                         names(top.tf)[ii], " than there are TF's given. All the given
-                       TF's will be considered as significant."))
+          warning(paste0("There a re more given top TF's for cell-type ", names(top.tf)[ii], " than there are TF's given. All the given TF's will be considered as significant."))
           
           curr$score <- 1
           temp[[length(temp)+1]] <- curr
@@ -142,27 +133,21 @@ checkInputs <- function(background.networks.list = background.networks.list,
     
     if(class(ccc.scores) != "data.frame"){
       
-      stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
-           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
-           NULL (default). Please check on your inputs.")
+      stop("The provided 'ccc.scores' object should be either a data-frame with colnames 'ccc' (character) and 'scores' (numerical) or set to NULL (default). Please check on your inputs.")
       
     } else {
       
       cc <- intersect(x = colnames(ccc.scores), y = c("ccc", "score"))
       if(length(cc) < 2){
         
-        stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
-           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
-           NULL (default). Please check on your inputs.")
+        stop("The provided 'ccc.scores' object should be either a data-frame with colnames 'ccc' (character) and 'scores' (numerical) or set to NULL (default). Please check on your inputs.")
         
       } else {
         
         if((class(ccc.scores$ccc) != "character") || 
            (class(ccc.scores$score) != "numeric")){
           
-          stop("ERROR: The provided 'ccc.scores' object should be either a data-frame
-           with colnames 'ccc' (character) and 'scores' (numerical) or set to 
-           NULL (default). Please check on your inputs.")
+          stop("The provided 'ccc.scores' object should be either a data-frame with colnames 'ccc' (character) and 'scores' (numerical) or set to NULL (default). Please check on your inputs.")
           
         } else {
           
@@ -172,18 +157,13 @@ checkInputs <- function(background.networks.list = background.networks.list,
           cc <- intersect(x = cell_types, y = names(background.networks.list$background.networks))
           if(length(cc) < length(background.networks.list$background.networks)){
             
-            stop("ERROR: You should provide cell-cell communication probability 
-                 scores for each pair of cell-types present in the system 
-                 separated by a '=' symbol (i.e. 'CellA=CellB'). Please
-                 check your inputs.")
+            stop("You should provide cell-cell communication probability scores for each pair of cell-types present in the system separated by a '=' symbol (i.e. 'CellA=CellB'). Please check your inputs.")
             
           }
           
           if(!((all(scores >= 0)) && all(scores <= 1))){
             
-            stop("ERROR: You should provide cell-cell communication probability 
-                 scores for each pair of cell-types present in the system 
-                 as numerical values between 0 and 1. Please check your inputs.")
+            stop("You should provide cell-cell communication probability scores for each pair of cell-types present in the system as numerical values between 0 and 1. Please check your inputs.")
             
           }
           
@@ -200,10 +180,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
     if((class(lr.scores) != "list") ||
        (length(intersect(x = names(lr.scores), y = names(background.networks.list$background.networks))) < length(background.networks.list$background.networks))){
       
-      stop("ERROR: The provided 'lr.scores' object should be a named list (by 
-            cell-types) of data-frames with colnames 'lr.interaction' (character) 
-            and 'score' (numerical) or set to NULL (default). Please check on 
-            your inputs.")
+      stop("The provided 'lr.scores' object should be a named list (by cell-types) of data-frames with colnames 'lr.interaction' (character) and 'score' (numerical) or set to NULL (default). Please check on your inputs.")
       
     } else {
       
@@ -212,20 +189,14 @@ checkInputs <- function(background.networks.list = background.networks.list,
         cc <- intersect(x = colnames(lr.scores[[ii]]), y = c("lr.interaction", "score"))
         if(length(cc) < 2){
           
-          stop("ERROR: The provided 'lr.scores' object should be a named list (by 
-            cell-types) of data-frames with colnames 'lr.interaction' (character) 
-            and 'score' (numerical) or set to NULL (default). Please check on 
-            your inputs.")
+          stop("The provided 'lr.scores' object should be a named list (by cell-types) of data-frames with colnames 'lr.interaction' (character) and 'score' (numerical) or set to NULL (default). Please check on your inputs.")
           
         } else {
           
           if((class(lr.scores[[ii]]$lr.interaction) != "character") || 
              (class(lr.scores[[ii]]$score) != "numeric")){
             
-            stop(paste0("ERROR: The provided 'lr.scores' for cell-type ", names(background.networks.list)[ii], 
-                 " object should be either a data-frame with colnames 'lr.interaction' 
-                 (character) and 'score' (numerical) or set to NULL (default). 
-                 Please check on your inputs."))
+            stop(paste0("The provided 'lr.scores' for cell-type ", names(background.networks.list)[ii], " object should be either a data-frame with colnames 'lr.interaction' (character) and 'score' (numerical) or set to NULL (default). Please check on your inputs."))
             
           } else {
             
@@ -234,17 +205,13 @@ checkInputs <- function(background.networks.list = background.networks.list,
             cc <- which(grepl(pattern = "=", x = lr.scores[[ii]]$lr.interaction, fixed = TRUE))
             if(length(cc) < 1){
               
-              stop("ERROR: You should provide LR enrichment scores for pairs of 
-                    ligand-receptor interactions incoming on each cell-type 
-                    separated by a '=' symbol. Please check your inputs.")
+              stop("You should provide LR enrichment scores for pairs of ligand-receptor interactions incoming on each cell-type separated by a '=' symbol. Please check your inputs.")
               
             }
             
             if(!((all(scores >= -1)) && all(scores <= 1))){
               
-              stop("ERROR: You should provide LR enrichment scores ffor pairs of 
-                    ligand-receptor interactions incoming on each cell-type 
-                    as numerical values between -1 and 1. Please check your inputs.")
+              stop("You should provide LR enrichment scores ffor pairs of ligand-receptor interactions incoming on each cell-type as numerical values between -1 and 1. Please check your inputs.")
               
             }
             
@@ -317,8 +284,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
      nSolutions!=round(nSolutions) ||
      nSolutions <= 0){
     
-    warning("The 'nSolutions' parameter should be a positive numeric integer.
-         We are stting to the default nSolutions=100.")
+    warning("The 'nSolutions' parameter should be a positive numeric integer. We are stting to the default nSolutions=100.")
     nSolutions <- 100
     
   }
@@ -333,16 +299,14 @@ checkInputs <- function(background.networks.list = background.networks.list,
   
   if(length(intersect(x = intensity, y = 0:4)) != 1){
     
-    warning("The 'intensity' parameter should be numeric value between 0 and 4.
-             We are setting to the default intensity=1.")
+    warning("The 'intensity' parameter should be numeric value between 0 and 4. We are setting to the default intensity=1.")
     intensity <- 1
     
   }
   
   if(length(intersect(x = replace, y = 0:2)) != 1){
     
-    warning("The 'replace' parameter should be numeric value between 0 and 2.
-             We are setting to the default replace=1.")
+    warning("The 'replace' parameter should be numeric value between 0 and 2. We are setting to the default replace=1.")
     replace <- 1
     
   }
@@ -351,8 +315,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
      threads!=round(threads) ||
      threads < 0){
     
-    warning("The 'threads' parameter should be a positive (or 0) numeric integer. 
-             We are setting to the default threads=0.")
+    warning("The 'threads' parameter should be a positive (or 0) numeric integer. We are setting to the default threads=0.")
     threads <- 0
     
   }
@@ -361,8 +324,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
      condition!=round(condition) ||
      condition <= 0){
     
-    warning("The 'condition' parameter should be a positive numeric integer.
-             We are setting to the default condition=1.")
+    warning("The 'condition' parameter should be a positive numeric integer. We are setting to the default condition=1.")
     condition <- 1
     
   }
@@ -381,6 +343,74 @@ checkInputs <- function(background.networks.list = background.networks.list,
     save_res <- FALSE
     
   }
+  
+  
+  # as.input object
+  if(!is.null(as.input)){
+    
+    if((class(as.input) != "data.frame") ||
+       (ncol(as.input) < 4) ||
+       (length(intersect(x = colnames(as.input), 
+                         y = c("cell_type", "proteinID", "domainID", "domain_type")))<4)){
+      
+      stop("If you use the 'as.input' input, it should be provided as a data-frame with 4 columns a colnames: 'cell_type', 'proteinID', 'domainID' and 'domain_type'. Otherwise, you can set 'as.input=NULL' in order to not account for splicing effects.")
+      
+    } else {
+      
+      if(!all(as.input$domain_type%in%c("exclusion", "inclusion"))){
+        
+        stop("In the 'domain_type' column of the 'as.input' data-frame object, users should either give character values of 'exclusion' (in the case when a domain is to be considered as skipped) or 'inclusion', in the case when users wish to include the domain in the solution. Please check the 'as.input' object again.")
+        
+      } else {
+        
+        if(length(intersect(x = unique(as.input$cell_type), 
+                            y = names(background.networks.list$background.networks))) == 0){
+          
+          stop("The cell-type names provided in the 'cell_type' column of the 'as.input' object do not match any of the cell-types names provided for 'background.networks' object. Ether revisethe content of 'as.input' data-frame or set to NULL in order to not account for splicing effects.")
+          
+        } else {
+          
+          idx2keep <- c()
+          for(ii in 1:nrow(as.input)){
+            
+            ind1 <- which(names(background.networks.list$background.networks)==as.input$cell_type[ii])
+            if(length(ind1) == 1){
+              
+              bn <- background.networks.list$background.networks[[ind1]]
+              ind2 <- c(intersect(x = which(bn$pfam_source==as.input$domainID[ii]), 
+                                  y = which(bn$gene_source==as.input$proteinID[ii])),
+                        intersect(x = which(bn$pfam_target==as.input$domainID[ii]), 
+                                  y = which(bn$gene_target==as.input$proteinID[ii])))
+              
+              if(length(ind2) > 0){idx2keep <- c(idx2keep, ii)}
+              
+            }
+            
+          }
+          
+          if(length(idx2keep) > 0){
+            
+            print(paste0(length(idx2keep), " domains out of ", nrow(as.input), 
+                         " total given in the 'as.input' have been found in the background network."))
+            
+            as.input <- as.input[idx2keep, ]
+            
+          } else {
+            
+            warning("None of the provided domains in the 'as.input' object have been identified in the background network. We will set as.input=NULL and proceed with network optimization without accounting for any splice effects.")
+            
+            as.input <- NULL
+            
+          }
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
   
   all_inputs <- list()
   all_inputs$background.networks.list = background.networks.list
@@ -404,6 +434,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
   all_inputs$threads = threads
   all_inputs$condition = condition
   all_inputs$save_res = save_res
+  all_inputs$as.input = as.input
   
   return(all_inputs)
   

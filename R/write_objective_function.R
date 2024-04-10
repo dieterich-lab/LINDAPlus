@@ -9,8 +9,7 @@ write_objective_function <- function(variables = variables,
                                      lambda3 = lambda3,
                                      lambda4 = lambda4){
   
-  print("Writing the objective function and constraints.
-        This might take a bit of time..")
+  print("Writing the objective function and constraints. This might take a bit of time..")
   
   cells <- names(tf.scores)
   background.network.list <- background.networks.list$background.networks
