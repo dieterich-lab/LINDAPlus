@@ -10,7 +10,7 @@ write_constraints_7 <- function(variables = variables,
     
     ## Exclusion
     cc1 <- c()
-    idx <- which(as.input$domain_type=="exclusion")
+    idx <- which(as.input$effect=="exclusion")
     if(length(idx) > 0){
       
       for(ii in 1:length(idx)){
@@ -30,7 +30,7 @@ write_constraints_7 <- function(variables = variables,
     
     ## Inclusion
     cc2 <- c()
-    idx <- which(as.input$domain_type=="inclusion")
+    idx <- which(as.input$effect=="inclusion")
     if(length(idx) > 0){
       
       for(ii in 1:length(idx)){
@@ -52,7 +52,7 @@ write_constraints_7 <- function(variables = variables,
           tmp <- bn[indtt, ]
           idx2rem <- c()
           pp <- paste0(as.input$cell_type, "::", as.input$proteinID, "::", 
-                       as.input$domainID, "::", as.input$domain_type)
+                       as.input$domainID, "::", as.input$effect)
           for(jj in 1:nrow(tmp)){
             
             nn <- intersect(x = pp, 
