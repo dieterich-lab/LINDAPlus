@@ -351,15 +351,15 @@ checkInputs <- function(background.networks.list = background.networks.list,
     if((class(as.input) != "data.frame") ||
        (ncol(as.input) < 4) ||
        (length(intersect(x = colnames(as.input), 
-                         y = c("cell_type", "proteinID", "domainID", "domain_type")))<4)){
+                         y = c("cell_type", "proteinID", "domainID", "effect")))<4)){
       
-      stop("If you use the 'as.input' input, it should be provided as a data-frame with 4 columns a colnames: 'cell_type', 'proteinID', 'domainID' and 'domain_type'. Otherwise, you can set 'as.input=NULL' in order to not account for splicing effects.")
+      stop("If you use the 'as.input' input, it should be provided as a data-frame with 4 columns a colnames: 'cell_type', 'proteinID', 'domainID' and 'effect'. Otherwise, you can set 'as.input=NULL' in order to not account for splicing effects.")
       
     } else {
       
-      if(!all(as.input$domain_type%in%c("exclusion", "inclusion"))){
+      if(!all(as.input$effect%in%c("exclusion", "inclusion"))){
         
-        stop("In the 'domain_type' column of the 'as.input' data-frame object, users should either give character values of 'exclusion' (in the case when a domain is to be considered as skipped) or 'inclusion', in the case when users wish to include the domain in the solution. Please check the 'as.input' object again.")
+        stop("In the 'effect' column of the 'as.input' data-frame object, users should either give character values of 'exclusion' (in the case when a domain is to be considered as skipped) or 'inclusion', in the case when users wish to include the domain in the solution. Please check the 'as.input' object again.")
         
       } else {
         
