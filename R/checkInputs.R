@@ -57,7 +57,9 @@ checkInputs <- function(background.networks.list = background.networks.list,
     for(ii in 1:length(obj2)){cc <- c(cc, class(obj2[[ii]]))}
     if(length(intersect(x = names(obj2), y = c("ligands", "receptors")))<2 ||
        all(cc != "character")){
-      stop("The 'ligands.receptors' should be a list of characters with a length of 2 named 'ligands' and 'receptors'. Please check your inputs.")
+      stop("The 'ligands.receptors' should be a list of characters with a length 
+           of at least 2 named 'ligands' and 'receptors' and optionally 
+           'perturbation.ligands'. Please check your inputs.")
     }
     
   }

@@ -9,6 +9,7 @@ process_background_network <- function(background.networks.list = background.net
   for(ii in 1:length(bnList)){
     
     bn <- bnList[[ii]]
+    
     idx <- intersect(x = which(is.na(bn$pfam_source)), 
                      y = which(is.na(bn$pfam_target)))
     

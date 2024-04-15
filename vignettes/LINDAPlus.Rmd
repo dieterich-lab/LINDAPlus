@@ -302,6 +302,52 @@ excluded protein domains affects the re-wiring of the protein interactions.
 ![**Figure 7:** LINDA+ Toy Example - Solution 5](./vignettes_pictures/lindaplus_toy5.jpeg){width=100%}
 
 
+### 8. Perturbation Effects
+Such feature which allows the users to introduce into the multicellular system effects from i.e. distant ligands or ligands which they themselves experimentally introduce into the system. In the case where the user wisshes to add perturbation effects from a specific ligand which does not come from any of the cell-types, LINDA+ automatically introduces into the system an auxilliary **PseudoCell** which consists of a single _PSEUDOLIGAND_, _PSEUDORECEPTOR_, _PSEUDOPROTEIN_ and _PSEUDOTF_ where the latter is then connected to the ligands that we are introducing in the system. In this case LINDA+ will then infer the interaction mechanisms happening within such **PseudoCell** and which lead to the secretion of the ligands which the users are are introducing remotely.
+
+Let's see how this example works by first loading the background network as well as the TF score objects with the effects from the **PseudoCell**
+
+```{r, warning=FALSE}
+load(file = system.file("extdata", "toy.background.networks.list.with.perturbations.RData", package = "LINDAPlus"))
+print(background.networks.list$background.networks$PseudoCell)
+
+load(file = system.file("extdata", "toy.tf.scores.with.perturbations.RData", package = "LINDAPlus"))
+print(tf.scores$PseudoCell)
+
+load(file = system.file("extdata", "toy.top.tf.with.perturbations.RData", package = "LINDAPlus"))
+print(top.tf)
+```
+
+As we can notice, in ```igands.receptors$perturbation.ligands``` we have defined the names of the ligands which we consider as perturbation/distant (meaning that it has not been secreted by any of the cell-types that we are considering).
+
+We can now run the network inference analysis as usual:
+
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores,
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf)
+
+print(res$combined_solutions)
+```
+In the figure below we can see the inferred network solution when the remote ligand _L5_ has been introduced into our three-cellular system.
+
+![**Figure 8:** LINDA+ Toy Example - Solution 6](./vignettes_pictures/lindaplus_toy6.jpeg){width=100%}
+The networks can of course also be further refined by introduceng additional information such as the ```ligand.scores```:
+
+```{r, warning=FALSE}
+res <- runLINDAPlus(background.networks.list = background.networks.list, 
+                    tf.scores = tf.scores,
+                    solverPath = "~/Downloads/cplex", 
+                    top.tf = top.tf, 
+                    ligand.scores = ligand.scores)
+
+print(res$combined_solutions)
+```
+
+**Figure 9** depticts how the additional information on the ```ligand.scores``` further refines the network.
+
+![**Figure 9:** LINDA+ Toy Example - Solution 7](./vignettes_pictures/lindaplus_toy7.jpeg){width=100%}
 
 ### 8. Visualization
 Users can additionally check for the type/attributes of each node component in the generated networks. This would help for further visualization of the networks through [Cytoscape](https://cytoscape.org/) or through the [LINDAvis](https://github.com/dieterich-lab/) R-shiny App (under development).
