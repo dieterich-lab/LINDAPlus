@@ -20,6 +20,7 @@ Imports:
     readxl,
     readr,
     XML,
+    xml2,
     igraph,
     rmarkdown,
     aggregation,

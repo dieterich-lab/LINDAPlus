@@ -2,54 +2,55 @@ write_constraints_2 <- function(variables = variables,
                                 background.networks.list = background.networks.list){
   
   constraints <- c()
-  
   cell_types <- names(background.networks.list$background.networks)
   
-  for(ii in 1:length(cell_types)){
+  for (cell in cell_types) {
+    # Filtering and cleaning variable expressions for the current cell type
+    cell_pattern <- paste0(cell, ":")
+    cell_mask <- grepl(cell_pattern, variables$var_exp, fixed = TRUE)
+    var <- variables$var[cell_mask]
+    var_exp_raw <- variables$var_exp[cell_mask]
+    var_exp <- sub(cell_pattern, "", var_exp_raw, fixed = TRUE)
     
-    var <- variables$var[which(grepl(pattern = paste0(cell_types[ii], ":"), x = variables$var_exp, fixed = TRUE))]
-    var_exp <- variables$var_exp[which(grepl(pattern = paste0(cell_types[ii], ":"), x = variables$var_exp, fixed = TRUE))]
-    var_exp <- gsub(pattern = paste0(cell_types[ii], ":"), replacement = "", x = var_exp, fixed = TRUE)
+    # Constraints for interactions
+    interaction_mask <- grepl("interaction ", var_exp, fixed = TRUE)
+    interaction_vars <- var[interaction_mask]
+    interaction_exps <- var_exp[interaction_mask]
+    interactions <- sub("interaction ", "", interaction_exps, fixed = TRUE)
+    interactions_split <- strsplit(interactions, "=")
+    ss <- sapply(interactions_split, '[', 1)
+    tt <- sapply(interactions_split, '[', 2)
     
-    # Interactions
-    cc1 <- c()
-    idx <- which(grepl(pattern = "interaction ", x = var_exp, fixed = TRUE))
-    ss <- sapply(strsplit(x = gsub(pattern = "interaction ", replacement = "", x = var_exp[idx], fixed = TRUE), 
-                          split = "=", fixed = TRUE), "[", 1)
-    tt <- sapply(strsplit(x = gsub(pattern = "interaction ", replacement = "", x = var_exp[idx], fixed = TRUE), 
-                          split = "=", fixed = TRUE), "[", 2)
-    for(jj in 1:length(idx)){
-      
-      cc1 <- c(cc1, paste0(var[which(var_exp==paste0("node ", ss[jj]))], 
-                           " + ",
-                           var[which(var_exp==paste0("node ", tt[jj]))],
-                           " - 2 ", var[idx[jj]],
-                           " >= 0"))
-    }
+    node_ss <- paste0("node ", ss)
+    node_tt <- paste0("node ", tt)
+    node_ss_idx <- match(node_ss, var_exp)
+    node_tt_idx <- match(node_tt, var_exp)
     
-    # Reactions
-    cc2 <- c()
-    idx <- which(grepl(pattern = "reaction ", x = var_exp, fixed = TRUE))
-    ddi <- sapply(strsplit(x = var_exp[idx], split = " ", fixed = TRUE), "[", 2)
-    ppi <- sapply(strsplit(x = var_exp[idx], split = " ", fixed = TRUE), "[", 4)
-    dd1 <- sapply(strsplit(x = ddi, split = "=", fixed = TRUE), "[", 1)
-    dd2 <- sapply(strsplit(x = ddi, split = "=", fixed = TRUE), "[", 2)
-    pp1 <- sapply(strsplit(x = ppi, split = "=", fixed = TRUE), "[", 1)
-    pp2 <- sapply(strsplit(x = ppi, split = "=", fixed = TRUE), "[", 2)
-    for(jj in 1:length(idx)){
-      
-      ind1 <- which(var_exp==paste0("domain ", dd1[jj], " of protein ", pp1[jj]))
-      ind2 <- which(var_exp==paste0("domain ", dd2[jj], " of protein ", pp2[jj]))
-      
-      cc2 <- c(cc2, paste0(var[ind1], " + ", var[ind2], " - 2 ", var[idx[jj]], " >= 0"))
-      
-      
-    }
+    cc1 <- paste0(var[node_ss_idx], " + ", var[node_tt_idx], " - 2 ", interaction_vars, " >= 0")
+    if (length(cc1) > 0) constraints <- c(constraints, cc1)
     
-    constraints <- c(constraints, cc1, cc2)
+    # Constraints for reactions
+    reaction_mask <- grepl("reaction ", var_exp, fixed = TRUE)
+    reaction_vars <- var[reaction_mask]
+    reaction_exps <- var_exp[reaction_mask]
+    reaction_details <- strsplit(reaction_exps, " ")
+    ddi <- sapply(reaction_details, '[', 2)
+    ppi <- sapply(reaction_details, '[', 4)
     
+    dd1 <- sapply(strsplit(ddi, "="), '[', 1)
+    dd2 <- sapply(strsplit(ddi, "="), '[', 2)
+    pp1 <- sapply(strsplit(ppi, "="), '[', 1)
+    pp2 <- sapply(strsplit(ppi, "="), '[', 2)
+    
+    domain1 <- paste0("domain ", dd1, " of protein ", pp1)
+    domain2 <- paste0("domain ", dd2, " of protein ", pp2)
+    
+    domain1_idx <- match(domain1, var_exp)
+    domain2_idx <- match(domain2, var_exp)
+    
+    cc2 <- paste0(var[domain1_idx], " + ", var[domain2_idx], " - 2 ", reaction_vars, " >= 0")
+    if (length(cc2) > 0) constraints <- c(constraints, cc2)
   }
   
   return(constraints)
-  
 }
