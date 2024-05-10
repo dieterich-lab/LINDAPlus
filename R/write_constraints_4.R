@@ -1,37 +1,43 @@
 write_constraints_4 <- function(variables = variables,
                                 background.networks.list = background.networks.list){
   
-  constraints <- c()
-  
+  constraints <- vector(mode = "character")
   cell_types <- names(background.networks.list$background.networks)
   
+  # Vectorized operations for the 'LR:' pattern matching and replacement
+  lr_mask <- grepl("LR:", variables$var_exp, fixed = TRUE)
+  var_lr <- variables$var[lr_mask]
+  var_exp_lr <- sub("LR:", "", variables$var_exp[lr_mask], fixed = TRUE)
+  reac <- var_exp_lr[grepl("reaction ", var_exp_lr, fixed = TRUE)]
+  reac <- sub("reaction ", "", reac, fixed = TRUE)
+  reac_splits <- strsplit(reac, "=", fixed = TRUE)
+  ppi <- sapply(reac_splits, function(x) paste(sub("_.*", "", x[1]), sub(".*_", "", x[2]), sep = "="))
+  
   # IC Part
-  for(ii in 1:length(cell_types)){
+  for (cell in cell_types) {
+    cell_mask <- grepl(paste0(cell, ":"), variables$var_exp, fixed = TRUE)
+    var <- variables$var[cell_mask]
+    var_exp <- sub(paste0(cell, ":"), "", variables$var_exp[cell_mask], fixed = TRUE)
+    interaction_mask <- grepl("interaction ", var_exp, fixed = TRUE)
+    interactions <- sub("interaction ", "", var_exp[interaction_mask], fixed = TRUE)
+    interaction_vars <- var[interaction_mask]
+    idx <- which(interaction_mask)
     
-    var <- variables$var[which(grepl(pattern = paste0(cell_types[ii], ":"), x = variables$var_exp, fixed = TRUE))]
-    var_exp <- variables$var_exp[which(grepl(pattern = paste0(cell_types[ii], ":"), x = variables$var_exp, fixed = TRUE))]
-    var_exp <- gsub(pattern = paste0(cell_types[ii], ":"), replacement = "", x = var_exp, fixed = TRUE)
-    
-    cc1 <- c()
-    cc2 <- c()
-    idx <- which(grepl(pattern = "interaction ", x = var_exp, fixed = TRUE))
-    for(jj in 1:length(idx)){
+    if (length(idx) > 0) {
+      interaction_details <- strsplit(var_exp, " ", fixed = TRUE)
+      curr_ints <- sapply(interaction_details, function(x) x[4])
+      cc1 <- cc2 <- character()
       
-      curr_int <- gsub(pattern = "interaction ", replacement = "", x = var_exp[idx[jj]], fixed = TRUE)
-      
-      ind <- which(sapply(strsplit(var_exp, split = " ", fixed = TRUE), "[", 4) == curr_int)
-      
-      if(length(ind) > 0){
-        
-        cc1 <- c(cc1, paste0(var[idx[jj]], " - ", var[ind], " >= 0"))
-        cc2 <- c(cc2, paste0(var[idx[jj]], " - ", paste0(var[ind], collapse = " - "), " <= 0"))
-        
+      for(jj in seq_along(idx)) {
+        ind <- which(curr_ints == interactions[jj])
+        if(length(ind) > 0){
+          cc1 <- c(cc1, paste0(var[idx[jj]], " - ", var[ind], " >= 0"))
+          cc2 <- c(cc2, paste0(var[idx[jj]], " - ", paste0(var[ind], collapse = " - "), " <= 0"))
+        }
       }
       
+      constraints <- c(constraints, cc1, cc2)
     }
-    
-    constraints <- c(constraints, cc1, cc2)
-    
   }
   
   #EC Part
@@ -47,7 +53,7 @@ write_constraints_4 <- function(variables = variables,
   cc1 <- c()
   cc2 <- c()
   idx <- which(grepl(pattern = "interaction ", x = var_exp, fixed = TRUE))
-  for(jj in 1:length(idx)){
+  for(jj in seq_along(idx)){
     
     curr_int <- gsub(pattern = "interaction ", replacement = "", x = var_exp[idx[jj]], fixed = TRUE)
     
@@ -65,5 +71,4 @@ write_constraints_4 <- function(variables = variables,
   constraints <- c(constraints, cc1, cc2)
   
   return(constraints)
-  
 }

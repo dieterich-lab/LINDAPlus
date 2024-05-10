@@ -5,70 +5,44 @@ write_loop_constraints <- function(variables = variables,
   receptors <- background.networks.list$ligands.receptors$receptors
   cells <- names(background.networks.list$background.networks)
   
-  lr <- variables$var_exp[which(grepl(pattern = "LR:interaction ", 
-                                      x = variables$var_exp, 
-                                      fixed = TRUE))]
-  lr <- sapply(strsplit(x = lr, split = " ", fixed = TRUE), "[", 2)
+  lr <- variables$var_exp[grepl("LR:interaction ", variables$var_exp, fixed = TRUE)]
+  lr <- sapply(strsplit(lr, " "), function(x) x[2])
   
-  constraints <- c()
-  for(ii in 1:length(background.networks.list$background.networks)){
-    
+  constraints <- vector("list", length(cells))
+  
+  for (ii in seq_along(cells)) {
     background.network <- background.networks.list$background.networks[[ii]]
-    
     sif <- unique(background.network[, c("gene_source", "gene_target")])
+    lr_mask <- paste0(sif[, 1], "=", sif[, 2]) %in% lr
+    sif <- sif[!lr_mask, ]
     
-    idx2rem <- which(paste0(sif[, 1], "=", sif[, 2])%in%lr)
-    if(length(idx2rem) > 0){
-      sif <- sif[-idx2rem, ]
-    }
+    speciesVar <- variables$var[grepl(paste0(cells[ii], ":node "), variables$var_exp, fixed = TRUE)]
+    speciesExp <- variables$var_exp[grepl(paste0(cells[ii], ":node "), variables$var_exp, fixed = TRUE)]
     
-    species <- unique(c(sif[, 1], sif[, 2]))
-    
-    speciesVar <- variables$var[grepl(pattern = paste0(cells[ii], ":node "),
-                                      x = variables$var_exp, 
-                                      fixed = TRUE)]
-    speciesExp <- variables$var_exp[grepl(pattern = paste0(cells[ii], ":node "),
-                                          x = variables$var_exp, 
-                                          fixed = TRUE)]
-    reacVar <- variables$var[grepl(pattern = paste0(cells[ii], ":interaction "),
-                                   x = variables$var_exp, 
-                                   fixed = TRUE)]
-    distVar <- variables$var[grepl(pattern = paste0(cells[ii], ":dist "),
-                                   x = variables$var_exp, 
-                                   fixed = TRUE)]
+    reacVar <- variables$var[grepl(paste0(cells[ii], ":interaction "), variables$var_exp, fixed = TRUE)]
+    distVar <- variables$var[grepl(paste0(cells[ii], ":dist "), variables$var_exp, fixed = TRUE)]
     
     cc1 <- paste0(speciesVar, " - ", distVar, " <= 0")
+    cc2 <- paste0(distVar, " <= 10001")
     
-    cc2 <- paste0(distVar, " <= ", 10001)
-    
-    cc3 <- rep("", nrow(sif))
-    for(jj in seq_len(nrow(sif))){
+    cc3 <- vector("character", nrow(sif))
+    for (jj in seq_len(nrow(sif))) {
+      var1_idx <- match(paste0(cells[ii], ":dist ", sif[jj, 2]), variables$var_exp)
+      var2_idx <- match(paste0(cells[ii], ":dist ", sif[jj, 1]), variables$var_exp)
+      var3_idx <- match(paste0(cells[ii], ":interaction ", sif[jj, 1], "=", sif[jj, 2]), variables$var_exp)
       
-      var1 <- variables$var[which(variables$var_exp==paste0(cells[ii], ":dist ",
-                                                            sif[jj, 2]))]
-      var2 <- variables$var[which(variables$var_exp==paste0(cells[ii], ":dist ",
-                                                            sif[jj, 1]))]
-      var3 <- variables$var[which(variables$var_exp==paste0(cells[ii], ":interaction ",
-                                                            sif[jj, 1],
-                                                            "=",
-                                                            sif[jj, 2]))]
-      
-      cc3[jj] <- paste0(var1,
+      cc3[jj] <- paste0(variables$var[var1_idx],
                         " - ",
-                        var2,
+                        variables$var[var2_idx],
                         " + 10001 ",
-                        var3,
+                        variables$var[var3_idx],
                         " <= ",
-                        -(1-10001))
-      
+                        -(1 - 10001))
     }
     
-    constraints <- unique(c(constraints, c(cc1, cc2, cc3)))
-    
+    constraints[[ii]] <- unique(c(cc1, cc2, cc3))
   }
   
-  
-  
-  return(constraints)
-  
+  # Flatten the constraints list to return a single vector
+  return(unlist(constraints))
 }

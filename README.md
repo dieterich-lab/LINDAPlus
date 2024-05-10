@@ -19,7 +19,7 @@ Once the CPLEX solver has been acquired by the user, they must save the executab
 #### 2. Package Depedencies
 Additionally before installation, the users must install the following R-package depedencies:
 [igraph](https://igraph.org/r/), [aggregation](https://cran.r-project.org/web/packages/aggregation/index.html) and
-[XML](https://cran.r-project.org/web/packages/XML/index.html).
+[xml2](https://cran.r-project.org/web/packages/xml2/index.html).
 
 #### 3. Package installation
 Once the required solvers have been obtained and the mentioned R-package depedencies have been installed, then the users can proceed with the installation of LINDA.
