@@ -93,7 +93,7 @@ process_background_network <- function(background.networks.list = background.net
     ss <- rep(NA, nrow(df))
     idx <- intersect(x = which(df$pfam_source=="PSEUDODOMAIN"), 
                      y = which(df$pfam_target!="PSEUDODOMAIN"))
-    ss[idx] <- 1
+    ss[idx] <- NA
     df$lr.scores <- ss
     
     temp2[[length(temp2)+1]] <- unique(df)
@@ -110,6 +110,10 @@ process_background_network <- function(background.networks.list = background.net
       if(length(ind) > 0){
         
         lr <- lr.scores[[ii]]
+        # idxidx <- which(lr$score==1)
+        # if(length(idxidx) > 0){
+        #   lr$score[idxidx] <- 0.999
+        # }
         for(jj in 1:nrow(lr)){
           
           ss <- strsplit(x = lr$lr.interaction[jj], split = "=", fixed = TRUE)[[1]][1]
@@ -203,11 +207,24 @@ process_background_network <- function(background.networks.list = background.net
     
   }
   
+  calculate_weights <- function(lr, ccc) {
+    if (is.na(lr) && is.na(ccc)) {
+      return(NA)
+    } else if (is.na(lr)) {
+      return(ccc)
+    } else if (is.na(ccc)) {
+      return(lr)
+    } else {
+      return(lr * ccc)
+    }
+  }
+  
   for(ii in 1:length(temp2)){
     temp2[[ii]]$ccc.scores <- temp3[[ii]]
-    temp2[[ii]]$lr.scores[which(is.na(temp2[[ii]]$lr.scores))] <- 1
-    temp2[[ii]]$ccc.scores[which(is.na(temp2[[ii]]$ccc.scores))] <- 1
-    temp2[[ii]]$weight <- temp2[[ii]]$lr.scores * temp2[[ii]]$ccc.scores
+    # temp2[[ii]]$lr.scores[which(is.na(temp2[[ii]]$lr.scores))] <- 1
+    # temp2[[ii]]$ccc.scores[which(is.na(temp2[[ii]]$ccc.scores))] <- 1
+    # temp2[[ii]]$weight <- temp2[[ii]]$lr.scores * temp2[[ii]]$ccc.scores
+    temp2[[ii]]$weight <- mapply(calculate_weights, temp2[[ii]]$lr.scores, temp2[[ii]]$ccc.scores)
   }
   
   
@@ -241,9 +258,9 @@ process_background_network <- function(background.networks.list = background.net
           toBind[, 2] <- domains
           toBind[, 3] <- receptors[jj]
           toBind[, 4] <- proteins[kk]
-          toBind[, 5] <- 1
-          toBind[, 6] <- 1
-          toBind[, 7] <- 1
+          toBind[, 5] <- NA
+          toBind[, 6] <- NA
+          toBind[, 7] <- NA
           colnames(toBind) <- colnames(curr)
           toBind <- as.data.frame(toBind)
           toBind$lr.scores <- as.numeric(toBind$lr.scores)

@@ -180,7 +180,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
   if(!is.null(lr.scores)){
     
     if((class(lr.scores) != "list") ||
-       (length(intersect(x = names(lr.scores), y = names(background.networks.list$background.networks))) < length(background.networks.list$background.networks))){
+       (length(intersect(x = names(lr.scores), y = names(background.networks.list$background.networks))) < 1)){
       
       stop("The provided 'lr.scores' object should be a named list (by cell-types) of data-frames with colnames 'lr.interaction' (character) and 'score' (numerical) or set to NULL (default). Please check on your inputs.")
       
