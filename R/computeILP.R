@@ -52,6 +52,7 @@ computeILP <- function(variables = variables,
   c9 <- write_loop_constraints(variables = variables, 
                                background.networks.list = background.networks.list)
   allC <- unique(c(c1, c2, c3, c4, c5, c6, c7, c8, c9))
+  save(allC, file = paste0("all_constraints_", condition, ".RData"))
   
   bounds <- write_bounds(variables = variables)
   binaries <- write_binaries(variables = variables)
