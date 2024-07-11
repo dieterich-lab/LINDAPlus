@@ -1,134 +1,183 @@
-# Lanyon
+# Read The Docs Theme for Jekyll and GitHub Pages
 
-Lanyon is an unassuming [Jekyll](http://jekyllrb.com) theme that places content first by tucking away navigation in a hidden drawer. It's based on [Poole](http://getpoole.com), the Jekyll butler.
+Port of the Read the Docs theme to Jekyll that can be used with GitHub Pages.
 
-![Lanyon](https://f.cloud.github.com/assets/98681/1825266/be03f014-71b0-11e3-9539-876e61530e24.png)
-![Lanyon with open sidebar](https://f.cloud.github.com/assets/98681/1825267/be04a914-71b0-11e3-966f-8afe9894c729.png)
+You can preview it in the
+[user documentation](https://carlosperate.github.io/jekyll-theme-rtd):
 
+![theme screenshot](docs/assets/img/screenshot.png)
 
-## Contents
+The original [Read The Docs](https://sphinx-rtd-theme.readthedocs.io)
+theme was created for [Sphinx](https://www.sphinx-doc.org/), and so it is
+designed specifically for documentation.
 
-- [Usage](#usage)
-- [Options](#options)
-  - [Sidebar menu](#sidebar-menu)
-  - [Themes](#themes)
-  - [Reverse layout](#reverse-layout)
-- [Development](#development)
-- [Author](#author)
-- [License](#license)
+Combined with [GitHub Pages](https://pages.github.com) it's a great and easy
+way to document your projects!
 
+Check out the [quick start guide]() to see how easy it is to 
 
-## Usage
+### 🚧 Warning!
 
-Lanyon is a theme built on top of [Poole](https://github.com/poole/poole), which provides a fully furnished Jekyll setup—just download and start the Jekyll server. See [the Poole usage guidelines](https://github.com/poole/poole#usage) for how to install and use Jekyll.
+This theme is currently a **Work-In-Progress** but, while some things might be
+broken, it should be already usable.
 
+Missing features are listed in the GitHub issues with the
+[to-do label](https://github.com/carlosperate/jekyll-theme-rtd/issues?q=is%3Aissue+is%3Aopen+label%3Ato-do),
+and any known issues are listed with the
+[bug label](https://github.com/carlosperate/jekyll-theme-rtd/issues?q=is%3Aissue+is%3Aopen+label%3Abug).
 
-## Options
-
-Lanyon includes some customizable options, typically applied via classes on the `<body>` element.
-
-
-### Sidebar menu
-
-Create a list of nav links in the sidebar by assigning each Jekyll page the correct layout in the page's [front-matter](http://jekyllrb.com/docs/frontmatter/).
-
-```
----
-layout: page
-title: About
----
-```
-
-**Why require a specific layout?** Jekyll will return *all* pages, including the `atom.xml`, and with an alphabetical sort order. To ensure the first link is *Home*, we exclude the `index.html` page from this list by specifying the `page` layout.
+Contributions are very welcomed!
 
 
-### Themes
+## 🗂️ Readme Contents
 
-Lanyon ships with eight optional themes based on the [base16 color scheme](https://github.com/chriskempson/base16). Apply a theme to change the color scheme (mostly applies to sidebar and links).
+This README contains mostly the developer documentation to edit this theme.
 
-![Lanyon with red theme](https://f.cloud.github.com/assets/98681/1825270/be065110-71b0-11e3-9ed8-9b8de753a4af.png)
-![Lanyon with red theme and open sidebar](https://f.cloud.github.com/assets/98681/1825269/be05ec20-71b0-11e3-91ea-a9138ef07186.png)
+To learn how to use this theme for your own website or docs check out the
+[user documentation](https://carlosperate.github.io/jekyll-theme-rtd).
 
-There are eight themes available at this time.
-
-![Available theme classes](https://f.cloud.github.com/assets/98681/1817044/e5b0ec06-6f68-11e3-83d7-acd1942797a1.png)
-
-To use a theme, add any one of the available theme classes to the `<body>` element in the `default.html` layout, like so:
-
-```html
-<body class="theme-base-08">
-  ...
-</body>
-```
-
-To create your own theme, look to the Themes section of [included CSS file](https://github.com/poole/lanyon/blob/master/public/css/lanyon.css). Copy any existing theme (they're only a few lines of CSS), rename it, and change the provided colors.
+- [🚀 Using this theme with GitHub Pages](#-using-this-theme-with-github-pages)
+- [👩‍💻 Developer Documentation](#-developer-documentation)
+    - [Run in a virtual machine with Vagrant](#run-in-a-virtual-machine-with-vagrant)
+    - [Run locally with Ruby](#run-locally-with-ruby)
+    - [Build the docs using the remote theme](#build-the-docs-using-the-remote-theme)
+    - [Build the docs with MkDocs for comparison](#build-the-docs-with-mkdocs-for-comparison)
+- [👨‍👩‍👧‍👦 Contributing](#-contributing)
+- [⚖️ License](#%EF%B8%8F-license)
 
 
-### Reverse layout
+## 🚀 Using this theme with GitHub Pages
 
-![Lanyon with reverse layout](https://f.cloud.github.com/assets/98681/1825265/be03f2e4-71b0-11e3-89f1-360705524495.png)
-![Lanyon with reverse layout and open sidebar](https://f.cloud.github.com/assets/98681/1825268/be056174-71b0-11e3-88c8-5055bca4307f.png)
+The fastest way to use this theme is with GitHub Pages, check out the
+[Quick Start Guide from the user documentation](https://carlosperate.github.io/jekyll-theme-rtd/quickstart.html).
 
-Reverse the page orientation with a single class.
+## 👩‍💻 Developer Documentation
 
-```html
-<body class="layout-reverse">
-  ...
-</body>
+These instructions describe two different ways to to set up your environment to
+develop or edit this theme.
+
+The theme is developed like a normal Jekyll site, and it can serve the
+documentation using the theme source code located here.
+
+### Run in a virtual machine with Vagrant
+
+[Vagrant](https://www.vagrantup.com) provides an easy way to set up and manage
+a Virtual Machine with [VirtualBox](https://www.virtualbox.org). With a single
+command you can automatically create the VM with all the dependencies required
+to build and sever this project.
+
+There is a [Vagrantfile](Vagrantfile) included to run an Ubuntu VM with Ruby
+and Jekyll. To set-up everything and serve the website run:
+
+```bash
+$ vagrant up
 ```
 
+The first time you run this command it will take a bit longer, as it downloads
+and installs everything. Subsequent runs will be much quicker.
 
-### Sidebar overlay instead of push
+This will serve the website at [http://localhost:4000](http://localhost:4000)
+with a hot-reload enabled, so any changes made on these files will trigger a
+rebuild.
 
-Make the sidebar overlap the viewport content with a single class:
+#### Other Vagrant commands
 
-```html
-<body class="sidebar-overlay">
-  ...
-</body>
+To stop the virtual machine first press `Ctrl+C` to end the Jekyll process and
+execute in your terminal:
+
+```
+$ vagrant halt
 ```
 
-This will keep the content stationary and slide in the sidebar over the side content. It also adds a `box-shadow` based outline to the toggle for contrast against backgrounds, as well as a `box-shadow` on the sidebar for depth.
+You can also SSH into the virtual machine with:
 
-It's also available for a reversed layout when you add both classes:
-
-```html
-<body class="layout-reverse sidebar-overlay">
-  ...
-</body>
+```
+$ vagrant ssh
 ```
 
-### Sidebar open on page load
+### Run locally with Ruby
 
-Show an open sidebar on page load by modifying the `<input>` tag within the `sidebar.html` layout to add the `checked` boolean attribute:
+This website has been developed using Ruby v2.5. You can install the
+dependencies with:
 
-```html
-<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox" checked>
+```bash
+$ gem install bundler
+$ bundle install
 ```
 
-Using Liquid you can also conditionally show the sidebar open on a per-page basis. For example, here's how you could have it open on the homepage only:
+### Build the docs using the remote theme
 
-```html
-<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox" {% if page.title =="Home" %}checked{% endif %}>
+The Jekyll project here is configured with the root of this repository as the
+root of the website, so when it is built locally it will see all pages as being
+inside a "docs" folder, and therefore in the "docs" category in the left
+navigation bar and page URLs.
+
+On the other hand the root of the website built and served with
+[GitHub Pages](https://carlosperate.github.io/jekyll-theme-rtd) is the
+"docs" folder, so the left navigation bar will show the child folder as
+categories and the URLs will be different.
+
+For updating the theme documentation it can be useful to build and sever the
+docs folder with the same configuration as GitHub Pages. Of course, this would
+mean that the theme used will be the current snapshot of `master` on GitHub
+instead of the local files, but that is not important to just preview the docs.
+
+To do this, add the following lines to the `docs/_config.yml` file:
+
+```yml
+plugins:
+  - jekyll-remote-theme
 ```
 
-## Development
+Then execute Jekyll from the docs folder:
 
-Lanyon has two branches, but only one is used for active development.
+```
+$ vagrant up --no-provision
+$ vagrant ssh
+(ssh session) $ cd /vagrant/docs
+(ssh session) $ bundle exec jekyll serve --host 0.0.0.0 --watch --force_polling
+```
 
-- `master` for development.  **All pull requests should be to submitted against `master`.**
-- `gh-pages` for our hosted site, which includes our analytics tracking code. **Please avoid using this branch.**
+### Build the docs with MkDocs for comparison
+
+As this theme has been ported from the MkDocs port, it can be useful to run
+MkDocs on the documentation markdown file and compare its output to the Jekyll
+output. A `mkdocs.yml` file is included to configure the project.
+
+Pipenv has been used to manage Python dependencies:
+
+```bash
+$ pip install pipenv
+$ pipenv install
+$ pipenv run mkdocs build
+$ cd _site_mkdocs
+$ pipenv run python -m http.server 8080
+```
 
 
-## Author
+## 👨‍👩‍👧‍👦 Contributing
 
-**Mark Otto**
-- <https://github.com/mdo>
-- <https://twitter.com/mdo>
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/carlosperate/jekyll-theme-rtd.
+
+This project is intended to be a safe, welcoming space for collaboration, and
+contributors are expected to adhere to the
+[Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 
-## License
+## ⚖️ License
 
-Open sourced under the [MIT license](LICENSE.md).
+The original theme is from
+[Read The Docs](https://github.com/readthedocs/sphinx_rtd_theme). Copyright ©
+2013-2018 Dave Snider, Read the Docs, Inc. & contributors, and released under
+the [MIT License](LICENSE-rtd).
 
-<3
+This theme is based on the [MkDocs](https://github.com/mkdocs/mkdocs)
+[`readthedocs` port](https://github.com/mkdocs/mkdocs/tree/1.0.4/mkdocs/themes/readthedocs).
+Copyright © 2014, Tom Christie, all rights reserved, and released under the
+[BSD 2-Clause "Simplified" License](LICENSE-mkdocs).
+
+The theme modifications to port it Jekyll can be seen
+[here](https://github.com/carlosperate/jekyll-theme-rtd/compare/dddce9f13fde24c03aee4533158c43091120d47e...master).
+This and all new features are released under the
+[BSD 2-Clause "Simplified" License](LICENSE).
