@@ -1,183 +1,101 @@
-# Read The Docs Theme for Jekyll and GitHub Pages
+# Docsy Jekyll Theme
 
-Port of the Read the Docs theme to Jekyll that can be used with GitHub Pages.
+[![CircleCI](https://circleci.com/gh/vsoch/docsy-jekyll/tree/master.svg?style=svg)](https://circleci.com/gh/vsoch/docsy-jekyll/tree/master)
+<a href="https://jekyll-themes.com/docsy-jekyll/">
+    <img src="https://img.shields.io/badge/featured%20on-JT-red.svg" height="20" alt="Jekyll Themes Shield" >
+</a>
 
-You can preview it in the
-[user documentation](https://carlosperate.github.io/jekyll-theme-rtd):
+![https://raw.githubusercontent.com/vsoch/docsy-jekyll/master/assets/img/docsy-jekyll.png](https://raw.githubusercontent.com/vsoch/docsy-jekyll/master/assets/img/docsy-jekyll.png)
 
-![theme screenshot](docs/assets/img/screenshot.png)
+This is a [starter template](https://vsoch.github.com/docsy-jekyll/) for a Docsy jekyll theme, based
+on the Beautiful [Docsy](https://github.com/google/docsy) that renders with Hugo. This version is intended for
+native deployment on GitHub pages. The original [Apache License](https://github.com/vsoch/docsy-jekyll/blob/master/LICENSE) is included.
 
-The original [Read The Docs](https://sphinx-rtd-theme.readthedocs.io)
-theme was created for [Sphinx](https://www.sphinx-doc.org/), and so it is
-designed specifically for documentation.
+## Changes
 
-Combined with [GitHub Pages](https://pages.github.com) it's a great and easy
-way to document your projects!
+The site is intended for purely documentation, so while the front page banner
+is useful for business or similar, this author (@vsoch) preferred to have
+the main site page go directly to the Documentation view. Posts
+are still provided via a feed.
 
-Check out the [quick start guide]() to see how easy it is to 
+## Usage
 
-### 🚧 Warning!
+### 1. Get the code
 
-This theme is currently a **Work-In-Progress** but, while some things might be
-broken, it should be already usable.
-
-Missing features are listed in the GitHub issues with the
-[to-do label](https://github.com/carlosperate/jekyll-theme-rtd/issues?q=is%3Aissue+is%3Aopen+label%3Ato-do),
-and any known issues are listed with the
-[bug label](https://github.com/carlosperate/jekyll-theme-rtd/issues?q=is%3Aissue+is%3Aopen+label%3Abug).
-
-Contributions are very welcomed!
-
-
-## 🗂️ Readme Contents
-
-This README contains mostly the developer documentation to edit this theme.
-
-To learn how to use this theme for your own website or docs check out the
-[user documentation](https://carlosperate.github.io/jekyll-theme-rtd).
-
-- [🚀 Using this theme with GitHub Pages](#-using-this-theme-with-github-pages)
-- [👩‍💻 Developer Documentation](#-developer-documentation)
-    - [Run in a virtual machine with Vagrant](#run-in-a-virtual-machine-with-vagrant)
-    - [Run locally with Ruby](#run-locally-with-ruby)
-    - [Build the docs using the remote theme](#build-the-docs-using-the-remote-theme)
-    - [Build the docs with MkDocs for comparison](#build-the-docs-with-mkdocs-for-comparison)
-- [👨‍👩‍👧‍👦 Contributing](#-contributing)
-- [⚖️ License](#%EF%B8%8F-license)
-
-
-## 🚀 Using this theme with GitHub Pages
-
-The fastest way to use this theme is with GitHub Pages, check out the
-[Quick Start Guide from the user documentation](https://carlosperate.github.io/jekyll-theme-rtd/quickstart.html).
-
-## 👩‍💻 Developer Documentation
-
-These instructions describe two different ways to to set up your environment to
-develop or edit this theme.
-
-The theme is developed like a normal Jekyll site, and it can serve the
-documentation using the theme source code located here.
-
-### Run in a virtual machine with Vagrant
-
-[Vagrant](https://www.vagrantup.com) provides an easy way to set up and manage
-a Virtual Machine with [VirtualBox](https://www.virtualbox.org). With a single
-command you can automatically create the VM with all the dependencies required
-to build and sever this project.
-
-There is a [Vagrantfile](Vagrantfile) included to run an Ubuntu VM with Ruby
-and Jekyll. To set-up everything and serve the website run:
+You can clone the repository right to where you want to host the docs:
 
 ```bash
-$ vagrant up
+git clone https://github.com/vsoch/docsy-jekyll.git docs
+cd docs
 ```
 
-The first time you run this command it will take a bit longer, as it downloads
-and installs everything. Subsequent runs will be much quicker.
+### 2. Customize
 
-This will serve the website at [http://localhost:4000](http://localhost:4000)
-with a hot-reload enabled, so any changes made on these files will trigger a
-rebuild.
+To edit configuration values, customize the [_config.yml](https://github.com/vsoch/docsy-jekyll/blob/master/_config.yml).
+To add pages, write them into the [pages](https://github.com/vsoch/docsy-jekyll/blob/master/pages) folder. 
+You define urls based on the `permalink` attribute in your pages,
+and then add them to the navigation by adding to the content of [_data/toc.myl](https://github.com/vsoch/docsy-jekyll/blob/master/_data/toc.yml).
+The top navigation is controlled by [_data/navigation.yml](https://github.com/vsoch/docsy-jekyll/blob/master/_data/navigation.yml)
 
-#### Other Vagrant commands
+### 3. Options
 
-To stop the virtual machine first press `Ctrl+C` to end the Jekyll process and
-execute in your terminal:
+Most of the configuration values in the [_config.yml](https://github.com/vsoch/docsy-jekyll/blob/master/_config.yml) are self explanatory,
+and for more details, see the [getting started page](https://vsoch.github.io/docsy-jekyll/docs/getting-started)
+rendered on the site.
 
-```
-$ vagrant halt
-```
+### 4. Serve
 
-You can also SSH into the virtual machine with:
-
-```
-$ vagrant ssh
-```
-
-### Run locally with Ruby
-
-This website has been developed using Ruby v2.5. You can install the
-dependencies with:
+Depending on how you installed jekyll:
 
 ```bash
-$ gem install bundler
-$ bundle install
+jekyll serve
+# or
+bundle exec jekyll serve
 ```
 
-### Build the docs using the remote theme
+**NOTE:** If the above serve command throws an error saying `require': cannot load such file -- webrick (LoadError)` try to run `bundle add webrick` to automatically add the webrick gem to your Gemfile, or manually add `gem "webrick"` line to the Gemfile and then run the serve command again.
 
-The Jekyll project here is configured with the root of this repository as the
-root of the website, so when it is built locally it will see all pages as being
-inside a "docs" folder, and therefore in the "docs" category in the left
-navigation bar and page URLs.
 
-On the other hand the root of the website built and served with
-[GitHub Pages](https://carlosperate.github.io/jekyll-theme-rtd) is the
-"docs" folder, so the left navigation bar will show the child folder as
-categories and the URLs will be different.
+### 5. Run as a container in dev or prod
 
-For updating the theme documentation it can be useful to build and sever the
-docs folder with the same configuration as GitHub Pages. Of course, this would
-mean that the theme used will be the current snapshot of `master` on GitHub
-instead of the local files, but that is not important to just preview the docs.
+#### Software Dependencies
 
-To do this, add the following lines to the `docs/_config.yml` file:
+If you want to run docsy jekyll via a container for development (dev) or production (prod) you can use containers. This approach requires installing [docker-ce](https://docs.docker.com/engine/install/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/). 
 
-```yml
-plugins:
-  - jekyll-remote-theme
+#### Customization
+
+Note that the [docker-compose.yml](docker-compose.yml) file is using the [jekyll/jekyll:3.8](https://hub.docker.com/r/jekyll/jekyll/tags) image. If you want to make your build more reproducible, you can specify a particular version for jekyll (tag). Note that at the development time of writing this documentation, the latest was tag 4.0.0,
+and it [had a bug](https://github.com/fastai/fastpages/issues/267#issuecomment-620612896) that prevented the server from deploying.
+
+If you are deploying a container to production, you should remove the line to
+mount the bundles directory to the host in the docker-compose.yml. Change:
+
+```yaml
+    volumes: 
+      - "./:/srv/jekyll"
+      - "./vendor/bundle:/usr/local/bundle"
+      # remove "./vendor/bundle:/usr/local/bundle" volume when deploying in production
 ```
 
-Then execute Jekyll from the docs folder:
+to:
 
-```
-$ vagrant up --no-provision
-$ vagrant ssh
-(ssh session) $ cd /vagrant/docs
-(ssh session) $ bundle exec jekyll serve --host 0.0.0.0 --watch --force_polling
+```yaml
+    volumes: 
+      - "./:/srv/jekyll"
 ```
 
-### Build the docs with MkDocs for comparison
+This additional volume is optimal for development so you can cache the bundle dependencies,
+but should be removed for production. 
 
-As this theme has been ported from the MkDocs port, it can be useful to run
-MkDocs on the documentation markdown file and compare its output to the Jekyll
-output. A `mkdocs.yml` file is included to configure the project.
+#### Start Container
 
-Pipenv has been used to manage Python dependencies:
+Once your docker-compose to download the base container and bring up the server:
 
 ```bash
-$ pip install pipenv
-$ pipenv install
-$ pipenv run mkdocs build
-$ cd _site_mkdocs
-$ pipenv run python -m http.server 8080
+docker-compose up -d
 ```
 
+You can then open your browser to [http://localhost:4000](http://localhost:4000)
+to see the server running.
 
-## 👨‍👩‍👧‍👦 Contributing
-
-Bug reports and pull requests are welcome on GitHub at
-https://github.com/carlosperate/jekyll-theme-rtd.
-
-This project is intended to be a safe, welcoming space for collaboration, and
-contributors are expected to adhere to the
-[Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
-
-## ⚖️ License
-
-The original theme is from
-[Read The Docs](https://github.com/readthedocs/sphinx_rtd_theme). Copyright ©
-2013-2018 Dave Snider, Read the Docs, Inc. & contributors, and released under
-the [MIT License](LICENSE-rtd).
-
-This theme is based on the [MkDocs](https://github.com/mkdocs/mkdocs)
-[`readthedocs` port](https://github.com/mkdocs/mkdocs/tree/1.0.4/mkdocs/themes/readthedocs).
-Copyright © 2014, Tom Christie, all rights reserved, and released under the
-[BSD 2-Clause "Simplified" License](LICENSE-mkdocs).
-
-The theme modifications to port it Jekyll can be seen
-[here](https://github.com/carlosperate/jekyll-theme-rtd/compare/dddce9f13fde24c03aee4533158c43091120d47e...master).
-This and all new features are released under the
-[BSD 2-Clause "Simplified" License](LICENSE).
+> Node : changes `baseurl: ""` in _config.yml  when you are running in local and prod according to the requirement.

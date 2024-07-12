@@ -1,37 +1,38 @@
-<footer>
-    {%- if (site.prev_next_buttons_location == 'bottom' or  site.prev_next_buttons_location =='both') and (previous_page or next_page) %}
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      {%- if next_page %}
-        <a href="{{ next_page.url | absolute_url }}" class="btn btn-neutral float-right" title="{{ next_page.title }}">Next <span class="icon icon-circle-arrow-right"></span></a>
-      {%- endif %}
-      {%- if previous_page %}
-        <a href="{{ previous_page.url | absolute_url }}" class="btn btn-neutral" title="{{ previous_page.title }}"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      {%- endif %}
+<footer class="bg-dark py-5 row d-print-none">
+  <div class="container-fluid mx-sm-5">
+    <div class="row">
+      <div class="col-6 col-sm-4 text-xs-center order-sm-2">
+        <ul class="list-inline mb-0">  
+          {% if site.twitter %}
+            <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="" aria-label="Twitter" data-original-title="Twitter">
+              <a class="text-white" target="_blank" href="https://twitter.com/{{ site.twitter }}">
+                <i class="fab fa-twitter"></i>
+              </a>
+            </li>
+          {% endif %}
+          {% if site.linkedin %}
+            <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="" aria-label="LinkedIn" data-original-title="LinkedIn">
+              <a class="text-white" target="_blank" href="https://linkedin.com/in/{{ site.linkedin }}">
+                <i class="fab fa-linkedin"></i>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-6 col-sm-4 text-right text-xs-center order-sm-3">
+        <ul class="list-inline mb-0">  
+          <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="" aria-label="GitHub" data-original-title="GitHub">
+            <a class="text-white" target="_blank" href="{{ site.repo }}">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
+        <small class="text-white">© {{ 'now' | date: "%Y" }} {{ site.author }} All Rights Reserved</small>
+        {% if site.privacy %}<small class="ml-1"><a href="{{ site.privacy }}" target="_blank">Privacy Policy</a></small>{% endif %}
+        <p class="mt-2"><a href="/about/">About Docsy</a></p>	
+      </div>
     </div>
-    {%- endif %}
-
-    <hr/>
-
-    <div role="contentinfo">
-      <p>
-        {%- if site.site_author %}
-          © Copyright {{ site.time | date: "%Y" }} {{ site.site_author }}.
-        {%- endif %}
-        {%- if site.github.build_revision %}
-          {%- if site.repo_url %}
-            <span class="commit">Revision <a href="{{ site.repo_url | url }}/commit/{{ site.github.build_revision }}" target="_blank"><code>{{ site.github.build_revision | truncate: 8, "" }}</code></a>.
-          {%- else %}
-            <span class="commit">Revision <code>{{ site.github.build_revision | truncate: 8, "" }}</code>.</span>
-          {%- endif %}
-        {%- endif %}
-      </p>
-    </div>
-    Built with
-    {%- if site.github %}
-    <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
-    {%- else %}
-    <a href="https://jekyllrb.com" target="_blank">Jekyll</a>
-    {%- endif %}
-    using a <a href="https://github.com/carlosperate/jekyll-theme-rtd" target="_blank">theme</a>
-    based on <a href="https://sphinx-rtd-theme.readthedocs.io" target="_blank">Read the Docs</a>.
+  </div>
 </footer>
