@@ -1,21 +1,20 @@
 # Dependencies
-markdown:         redcarpet
-highlighter:      pygments
+markdown:         kramdown
+highlighter:      rouge
 
 # Permalinks
 permalink:        pretty
-relative_permalinks: true
 
 # Setup
 title:            LINDA+
 tagline:          'A Jekyll theme'
 description:      'Linear Integer programming for Network reconstruction using transcriptomics and Differential splicing data Analysis'
-url:              http://hyde.getpoole.com
-baseurl:          /
+url:              "https://enio23.github.io"
+baseurl:          "/LINDAPlus" # Make sure this is the name of your repository
 
 author:
   name:           'Enio Gjerga'
-  url:            https://enio23.github.io/
+  url:            "https://enio23.github.io"
 
 paginate:         5
 
@@ -23,4 +22,19 @@ paginate:         5
 version:          2.1.0
 
 github:
-  repo:           https://github.com/dieterich-lab/LINDAPlus
+  repo:           "https://github.com/dieterich-lab/LINDAPlus"
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+  - jekyll-paginate
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+
+# Exclusions
+exclude:
+  - CNAME
