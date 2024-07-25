@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Introducing Hyde
+title: LINDA+
 ---
 
-Hyde is a brazen two-column [Jekyll](http://jekyllrb.com) theme that pairs a prominent sidebar with uncomplicated content. It's based on [Poole](http://getpoole.com), the Jekyll butler.
+LINDA+ is a method used to identify intra- and inter-cellular interaction networks at a domain resolution, allowing to further study the effects of AS on signalling. It is a tool that integrates prior knowledge (PKN) of directed joint interactions (protein-protein and Domain-Domain intra-cellular interactions) as well as structurally resolved ligand-receptor pairs from various resources (list of resources when ready) with estimated transcription factor enzymatic activities based on sc-RNAseq reads and optionally abundances of secreted extra-cellular proteins from Secretomics data analysis.
 
 ### Built on Poole
 
