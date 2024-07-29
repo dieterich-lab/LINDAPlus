@@ -124,33 +124,6 @@ create_variables <- function(background.networks.list = background.networks.list
   #
   cc <- c(cc1, cc2, cc3, cc4, cc5, cc6)
   ccExp <- c(cc1Exp, cc2Exp, cc3Exp, cc4Exp, cc5Exp, cc6Exp)
-  # idx2rem <- c()
-  # for(ii in 1:length(background.network.list)){
-  #   
-  #   reacs <- paste0(background.network.list[[ii]]$gene_source[which(background.network.list[[ii]]$gene_source%in%background.networks.list$ligands.receptors$ligands)],
-  #                   "=",
-  #                   background.network.list[[ii]]$gene_target[which(background.network.list[[ii]]$gene_target%in%background.networks.list$ligands.receptors$receptors)])
-  #   
-  #   if(length(reacs) > 0){
-  #     
-  #     for(jj in 1:length(reacs)){
-  #       
-  #       ind <- intersect(x = which(grepl(pattern = paste0(names(background.network.list)[ii], ":"), x = ccExp, fixed = TRUE)), 
-  #                        y = which(grepl(pattern = reacs[jj], x = ccExp, fixed = TRUE)))
-  #       
-  #       idx2rem <- c(idx2rem, ind)
-  #       
-  #     }
-  #     
-  #   }
-  #   
-  # }
-  # 
-  # if(length(idx2rem) > 0){
-  #   cc <- cc[-idx2rem]
-  #   ccExp <- ccExp[-idx2rem]
-  # }
-  
   
   variables <- list()
   variables[[length(variables)+1]] <- cc

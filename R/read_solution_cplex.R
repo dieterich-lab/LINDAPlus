@@ -27,7 +27,7 @@ read_solution_cplex <- function(variables = variables,
   xml_data <- xml2::read_xml(cplexSolutionFileName, options = "COMPACT")
   solutions <- xml2::xml_find_all(xml_data, ".//CPLEXSolution")
   results <- lapply(solutions[2:length(solutions)], process_solution)
-  
+  # save(results, file = paste0("result_", condition, ".RData"))
   
   #
   cplexSolutionIntAll <- list()
@@ -37,24 +37,17 @@ read_solution_cplex <- function(variables = variables,
   
   for(ii in 1:(length(results))){
     
-    # currSolution <- cplexSolution[[1]][[ii]][[4]]
-    # 
-    # names <- lapply(currSolution, function(x) attr(x, "name"))
-    # values <- lapply(currSolution, function(x) attr(x, "value"))
-    # 
-    # mm <- data.frame(name = unlist(names), value = unlist(values), stringsAsFactors = FALSE)
-    
     currSolution <- results[[ii]]
     
     names <- currSolution$names
     values <- currSolution$values
     
-    mm <- data.frame(name = names, value = values, stringsAsFactors = FALSE)
+    MM <- data.frame(name = names, value = values, stringsAsFactors = FALSE)
     
-    mm <- mm[which(mm$name%in%reacVar), ]
+    mm <- MM[which(MM$name%in%reacVar), ]
     mm$value <- gsub(pattern = "-", replacement = "", fixed = TRUE, x = mm$value)
     mm$value <- as.numeric(mm$value)
-    mm <- mm[which(mm$value>0.99), ]
+    mm <- mm[intersect(x = which(mm$value>0.99), y = which(mm$value<1.01)), ]
     
     reacs <- rep("", nrow(mm))
     for(jj in 1:nrow(mm)){
@@ -65,7 +58,33 @@ read_solution_cplex <- function(variables = variables,
     }
     mm$reacs <- reacs
     
-    cplexSolutionReacAll[[length(cplexSolutionReacAll)+1]] <- reacs
+    mm <- MM[which(MM$name%in%intVar), ]
+    mm$value <- gsub(pattern = "-", replacement = "", fixed = TRUE, x = mm$value)
+    mm$value <- as.numeric(mm$value)
+    mm <- mm[intersect(x = which(mm$value>0.99), y = which(mm$value<1.01)), ]
+    
+    intPPI <- variables$var_exp[which(variables$var%in%mm$name)]
+    intPPI <- paste0(sapply(strsplit(x = intPPI, split = ":", fixed = TRUE), "[", 1), ":", 
+                     sapply(strsplit(x = intPPI, split = " ", fixed = TRUE), "[", 2))
+    
+    intDDI <- paste0(sapply(strsplit(x = reacs, split = ":", fixed = TRUE), "[", 1), ":", 
+                     sapply(strsplit(x = reacs, split = " ", fixed = TRUE), "[", 4))
+    indNA <- which(intDDI %in% paste0(c("LR", names(background.networks.list$background.networks)), ":NA"))
+    for(zz in 1:length(indNA)){
+      
+      curr <- reacs[indNA[zz]]
+      curr <- strsplit(x = curr, split = " ", fixed = TRUE)[[1]][2]
+      currSS <- strsplit(x = strsplit(x = curr, split = "=", fixed = TRUE)[[1]][1], 
+                         split = "_", fixed = TRUE)[[1]][2]
+      currTT <- strsplit(x = strsplit(x = curr, split = "=", fixed = TRUE)[[1]][2], 
+                         split = "_", fixed = TRUE)[[1]][2]
+      intDDI[indNA[zz]] <- paste0(strsplit(reacs[indNA[zz]], split = ":", fixed = TRUE)[[1]][1], 
+                                  ":", currSS, "=", currTT)
+      
+    }
+    idx2keep <- which(intDDI %in% intPPI)
+    
+    cplexSolutionReacAll[[length(cplexSolutionReacAll)+1]] <- reacs[idx2keep]
     
   }
   
@@ -131,6 +150,15 @@ read_solution_cplex <- function(variables = variables,
   net[, 4] <- as.character(as.numeric(net[, 4])+1)
   net <- as.data.frame(net)
   net$Weight <- as.numeric(net$Weight)
+  ct <- setdiff(x = unique(net$Space), y = "Extra-Cellular")
+  ct <- ct[order(ct)]
+  ind2order <- which(net$Space=="Extra-Cellular")
+  for(ii in 1:length(ct)){
+    ind2order <- c(ind2order, which(net$Space==ct[ii]))
+  }
+  net <- net[ind2order, ]
+  ind2rem <- which(net$Gene_Source%in%c("PSEUDOLIGAND", "PSEUDORECEPTOR", "PSEUDOPROTEIN", "PSEUDOTF"))
+  if(length(ind2rem) > 0){net <- net[-ind2rem, ]}
   
   ## Attributes
   allTF <- c()
@@ -175,12 +203,6 @@ read_solution_cplex <- function(variables = variables,
   attributes <- unique(rbind(attr1, attr2))
   colnames(attributes) <- c("node", "attribute")
   attributes <- as.data.frame(attributes)
-  
-  ind <- which(net$Space=="Extra-Cellular")
-  for(ii in 1:length(tf.scores)){
-    ind <- c(ind, which(net$Space==names(tf.scores)[ii]))
-  }
-  net <- net[ind, ]
   
   res <- list()
   res[[length(res)+1]] <- net

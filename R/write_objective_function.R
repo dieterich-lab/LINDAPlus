@@ -101,57 +101,6 @@ write_objective_function <- function(variables = variables,
   }
   objective.function <- paste0(of1, of2, collapse = " + ")
   
-  
-  # if((is.null(lr.scores)) && (is.null(ccc.scores))){
-  #   
-  #   of3 <- ""
-  #   
-  # } else {
-  #   
-  #   of3 <- ""
-  #   cc <- c()
-  #   for(ii in 1:length(background.network.list)){
-  #     
-  #     df <- background.network.list[[ii]]
-  #     
-  #     ind <- intersect(x = which(df$pfam_source == "PSEUDODOMAIN"), 
-  #                      y = which(df$pfam_target != "PSEUDODOMAIN"))
-  #     
-  #     ppp <- unique(paste0(df$gene_source[ind], "=", df$gene_target[ind]))
-  #     ppp_src <- paste0(df$gene_source, "=", df$gene_target)
-  #     
-  #     varvar1 <- rep("", length(ppp))
-  #     valval1 <- rep(0, length(ppp))
-  #     for(jj in 1:length(ppp)){
-  #       
-  #       varvar1[jj] <- variables$var[which(variables$var_exp == paste0(names(background.network.list)[ii], 
-  #                                                                      ":interaction ", 
-  #                                                                      strsplit(ppp[jj], split = "=", fixed = TRUE)[[1]][1], 
-  #                                                                      "=", 
-  #                                                                      strsplit(ppp[jj], split = "=", fixed = TRUE)[[1]][2]))]
-  #       
-  #       if(all(is.na(df$weight[which(ppp_src==ppp[jj])]))){
-  #         valval1[jj] <- 1
-  #       } else {
-  #         valval1[jj] <- 1- mean(df$weight[which(ppp_src==ppp[jj])], na.rm = TRUE)
-  #       }
-  #       
-  #     }
-  #     
-  #     fff <- rep("", length(ppp))
-  #     for(jj in 1:length(ppp)){
-  #       fff[jj] <- paste0(lambda3 * valval1[jj], " ", varvar1[jj])
-  #     }
-  #     of3 <- paste0(fff, collapse = " + ")
-  #     
-  #     cc <- c(cc, of3)
-  #     
-  #   }
-  #   
-  #   objective.function <- paste0(objective.function, paste0(cc, collapse = " + "))
-  #   
-  # }
-  
   if((is.null(lr.scores)) && (is.null(ccc.scores))){
     
     of3 <- ""
@@ -164,8 +113,8 @@ write_objective_function <- function(variables = variables,
       
       df <- background.network.list[[ii]]
       
-      ind <- intersect(x = intersect(x = which(df$pfam_source == "PSEUDODOMAIN"), 
-                                     y = which(df$pfam_target != "PSEUDODOMAIN")), 
+      ind <- intersect(x = intersect(x = which(df$pfam_source == "PSEUDODOMAINLR"), 
+                                     y = which(df$pfam_target != "PSEUDODOMAINLR")), 
                        y = which(!is.na(df$weight)))
       
       if(length(ind) > 0){
@@ -200,37 +149,6 @@ write_objective_function <- function(variables = variables,
         
         cc <- c(cc, of3)
         
-        # Now penalize the rest of the ligands
-        ind2 <- setdiff(x = intersect(x = which(df$pfam_source == "PSEUDODOMAIN"), 
-                                        y = which(df$pfam_target != "PSEUDODOMAIN")), 
-                          y = which(!is.na(df$weight)))
-        
-        if(length(ind2) > 0){
-          
-          ppp2 <- unique(paste0(df$gene_source[ind2], "=", df$gene_target[ind2]))
-          
-          varvar2 <- rep("", length(ppp2))
-          valval2 <- rep(0.001, length(ppp2))
-          for(jj in 1:length(ppp2)){
-            
-            varvar2[jj] <- variables$var[which(variables$var_exp == paste0(names(background.network.list)[ii], 
-                                                                           ":interaction ", 
-                                                                           strsplit(ppp2[jj], split = "=", fixed = TRUE)[[1]][1], 
-                                                                           "=", 
-                                                                           strsplit(ppp2[jj], split = "=", fixed = TRUE)[[1]][2]))]
-            
-          }
-          
-          fff2 <- rep("", length(ppp2))
-          for(jj in 1:length(ppp2)){
-            fff2[jj] <- paste0(valval2[jj], " ", varvar2[jj])
-          }
-          of32 <- paste0(fff2, collapse = " + ")
-          of32 <- paste0(" + ", of32)
-          
-          cc <- c(cc, of32)
-          
-        }
         
       }
       
@@ -243,12 +161,16 @@ write_objective_function <- function(variables = variables,
   
   
   # Write fourth objective - size penalty factor
-  # idx <- setdiff(x = which(grepl(pattern = ":domain ", x = variables$var_exp, fixed = TRUE)), 
-  #                y = which(grepl(pattern = "PSEUDODOMAIN", x = variables$var_exp, fixed = TRUE)))
-  # idx <- which(grepl(pattern = ":domain ", x = variables$var_exp, fixed = TRUE))
-  idx <- c(setdiff(x = which(grepl(pattern = "reaction", x = variables$var_exp, fixed = TRUE)), 
-                   y = which(grepl(pattern = "PSEUDODOMAIN", x = variables$var_exp, fixed = TRUE))),
-           which(grepl(pattern = "PSEUDODOMAIN=PSEUDODOMAIN", x = variables$var_exp, fixed = TRUE)))
+  
+  # idx <- c(which(grepl(pattern = "interaction", x = variables$var_exp, fixed = TRUE)),
+  #          intersect(x = which(grepl(pattern = "reaction ", x = variables$var_exp, fixed = TRUE)),
+  #                    y = which(grepl(pattern = "PSEUDODOMAIN", x = variables$var_exp, fixed = TRUE))))
+  # idx <- which(grepl(pattern = "interaction", x = variables$var_exp, fixed = TRUE))
+  
+  # idx <- which(grepl(pattern = "reaction", x = variables$var_exp, fixed = TRUE))
+  
+  idx <- which(grepl(pattern = "domain", x = variables$var_exp, fixed = TRUE))
+  
   if(lambda4>0){
     obj <- paste0(" + ", lambda4, " ", variables$var[idx])
     obj <- paste0(obj, collapse = "")

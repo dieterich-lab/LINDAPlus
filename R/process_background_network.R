@@ -26,7 +26,7 @@ process_background_network <- function(background.networks.list = background.net
           
           tobind <- matrix(data = , nrow = length(domains), ncol = 4)
           tobind[, 1] <- domains
-          tobind[, 2] <- "PSEUDODOMAIN"
+          tobind[, 2] <- "PSEUDODOMAINTF"
           tobind[, 3] <- bn$gene_source[idx[jj]]
           tobind[, 4] <- bn$gene_target[idx[jj]]
           
@@ -61,7 +61,7 @@ process_background_network <- function(background.networks.list = background.net
     
     idx <- which(is.na(bn$pfam_source))
     if(length(idx) > 0){
-      bn$pfam_source[idx] <- "PSEUDODOMAIN"
+      bn$pfam_source[idx] <- "PSEUDODOMAINLR"
     }
     
     idx <- which(is.na(bn$pfam_target))
@@ -75,8 +75,8 @@ process_background_network <- function(background.networks.list = background.net
                      y = which(bn$gene_target%in%background.networks.list$ligands.receptors$ligands))
     
     if(length(idx) > 0){
-      bn$pfam_source[idx] <- "PSEUDODOMAIN"
-      bn$pfam_target[idx] <- "PSEUDODOMAIN"
+      bn$pfam_source[idx] <- "PSEUDODOMAINTF"
+      bn$pfam_target[idx] <- "PSEUDODOMAINTF"
     }
     
     temp[[length(temp)+1]] <- bn
@@ -91,8 +91,8 @@ process_background_network <- function(background.networks.list = background.net
     
     df <- temp[[ii]]
     ss <- rep(NA, nrow(df))
-    idx <- intersect(x = which(df$pfam_source=="PSEUDODOMAIN"), 
-                     y = which(df$pfam_target!="PSEUDODOMAIN"))
+    idx <- intersect(x = which(df$pfam_source=="PSEUDODOMAINLR"), 
+                     y = which(df$pfam_target!="PSEUDODOMAINLR"))
     ss[idx] <- NA
     df$lr.scores <- ss
     
@@ -161,8 +161,8 @@ process_background_network <- function(background.networks.list = background.net
       lr_source <- temp2[[source_cell]]
       lr_target <- temp2[[target_cell]]
       
-      ind1 <- which(lr_source$pfam_source=="PSEUDODOMAIN")
-      ind2 <- which(lr_target$pfam_source=="PSEUDODOMAIN")
+      ind1 <- which(lr_source$pfam_source=="PSEUDODOMAINLR")
+      ind2 <- which(lr_target$pfam_source=="PSEUDODOMAINLR")
       
       if((length(ind1) > 0) && (length(ind2) > 0)){
         

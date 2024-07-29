@@ -45,8 +45,49 @@ write_constraints_3 <- function(variables = variables,
       }
     })
     
+    cc1 <- unique(unlist(cc1))
+    cc2 <- unique(unlist(cc2))
+    
+    tmp <- cc1[sapply(cc1, function(x) length(unlist(strsplit(x, " "))) == 5)]
+    ll_exp <- paste0(cell, ":node ", background.networks.list$ligands.receptors$ligands)
+    ll_var <- variables$var[which(variables$var_exp%in%ll_exp)]
+    vec2rem <- vector("list", length(tmp))
+    count <- 0
+    for (ii in seq_along(tmp)) {
+      str2check <- strsplit(tmp[ii], " ")[[1]][1]
+      if (str2check %in% ll_var) {
+        count <- count + 1
+        vec2rem[[count]] <- tmp[ii]
+      }
+    }
+    vec2rem <- unlist(vec2rem[1:count])
+    
+    ind2rem <- which(cc1%in%vec2rem)
+    if(length(ind2rem) > 0){
+      cc1 <- cc1[-ind2rem]
+    }
+    
+    tmp <- cc2[sapply(cc2, function(x) length(unlist(strsplit(x, " "))) == 5)]
+    ll_exp <- paste0(cell, ":node ", background.networks.list$ligands.receptors$ligands)
+    ll_var <- variables$var[which(variables$var_exp%in%ll_exp)]
+    vec2rem <- vector("list", length(tmp))
+    count <- 0
+    for (ii in seq_along(tmp)) {
+      str2check <- strsplit(tmp[ii], " ")[[1]][3]
+      if (str2check %in% ll_var) {
+        count <- count + 1
+        vec2rem[[count]] <- tmp[ii]
+      }
+    }
+    vec2rem <- unlist(vec2rem[1:count])
+    
+    ind2rem <- which(cc2%in%vec2rem)
+    if(length(ind2rem) > 0){
+      cc2 <- cc2[-ind2rem]
+    }
+    
     # Combine and append constraints
-    constraints <- c(constraints, unlist(cc1), unlist(cc2))
+    constraints <- c(constraints, cc1, cc2)
   }
   
   return(constraints)

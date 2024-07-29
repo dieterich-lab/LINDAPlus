@@ -40,6 +40,18 @@ write_constraints_4 <- function(variables = variables,
     }
   }
   
+  var2rem <- variables$var[which(grepl(pattern = "Cardiomyocytes:reaction PSEUDODOMAINLR=", x = variables$var_exp, fixed = TRUE))]
+  if(length(var2rem) > 0){
+    remrem <- c()
+    for(ll in 1:length(var2rem)){
+      remrem <- c(remrem, which(grepl(pattern = var2rem[ll], x = constraints, fixed = TRUE)))
+    }
+    remrem <- unique(remrem)
+    if(length(remrem) > 0){
+      constraints <- constraints[-remrem]
+    }
+  }
+  
   #EC Part
   var <- variables$var[which(grepl(pattern = "LR:", x = variables$var_exp, fixed = TRUE))]
   var_exp <- variables$var_exp[which(grepl(pattern = "LR:", x = variables$var_exp, fixed = TRUE))]

@@ -162,6 +162,9 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   
   options(scipen=999)
   
+  print("LINDA analysis start !!")
+  print("Now checking all the inputs")
+  
   all_inputs <- checkInputs(background.networks.list = background.networks.list,
                             ligand.scores = ligand.scores,
                             tf.scores = tf.scores,
@@ -209,10 +212,17 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   condition <- all_inputs$condition
   save_res <- all_inputs$save_res
   
+  print("Checking of all the inputs: Done! Now processing background network...")
+  
   
   background.networks.list <- process_background_network(background.networks.list = background.networks.list, 
                                                          tf.scores = tf.scores, lr.scores = lr.scores, ccc.scores = ccc.scores)
+  
+  print("Processing the background network: Done! Now creating all the variables...")
+  
   variables <- create_variables(background.networks.list = background.networks.list)
+  
+  print("Writing of all the variables: Done! Now writing the objective function...")
   
   res <- computeILP(variables = variables, background.networks.list = background.networks.list, 
                     tf.scores = tf.scores, ligand.scores = ligand.scores, lr.scores = lr.scores, 
