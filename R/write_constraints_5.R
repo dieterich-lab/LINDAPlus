@@ -37,8 +37,8 @@ write_constraints_5 <- function(variables = variables,
     
     vv <- vv[vv != 0]  # Remove zero entries
     if (length(vv) > 0) {
-      cc1[[ii]] <- paste0(length(cell_types), " ", lr_ligand_vars[ii], " - ", paste(vv, collapse = " - "), " >= 0")
-      cc2[[ii]] <- paste0(length(cell_types), " ", lr_ligand_vars[ii], " - ", paste(vv, collapse = " - "), " <= ", length(cell_types) - 1)
+      cc1[[ii]] <- paste0(length(vv), " ", lr_ligand_vars[ii], " - ", paste(vv, collapse = " - "), " >= 0")
+      cc2[[ii]] <- paste0(length(vv), " ", lr_ligand_vars[ii], " - ", paste(vv, collapse = " - "), " <= ", length(vv) - 1)
     }
   }
   
@@ -52,31 +52,31 @@ write_constraints_5 <- function(variables = variables,
   # Constraints 5b
   cc3 <- c()
   cc4 <- c()
-  for(ii in seq_along(all_ligands)){
-    
-    if(all_ligands[ii] != "PSEUDOLIGAND"){
-      
-      for(jj in seq_along(cell_types)){
-        
-        var <- variables$var[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
-        var_exp <- variables$var_exp[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
-        
-        intint <- paste0(cell_types[jj], ":interaction ", tf.scores[[jj]]$tf, "=", all_ligands[ii])
-        
-        idx1 <- which(var_exp==paste0(cell_types[jj], ":node ", all_ligands[ii]))
-        idx2 <- which(var_exp %in% intint)
-        
-        
-        if((length(idx1)==1) && (length(idx2) > 0)){
-          cc3 <- c(cc3, paste0(var[idx1], " - ", paste0(var[idx2], collapse = " - "), " <= 0"))
-          cc4 <- c(cc4, paste0(var[idx1], " - ", var[idx2], " >= 0"))
-        }
-        
-      }
-      
-    }
-    
-  }
+  # for(ii in seq_along(all_ligands)){
+  #   
+  #   if(all_ligands[ii] != "PSEUDOLIGAND"){
+  #     
+  #     for(jj in seq_along(cell_types)){
+  #       
+  #       var <- variables$var[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
+  #       var_exp <- variables$var_exp[which(grepl(pattern = paste0(cell_types[jj], ":"), x = variables$var_exp, fixed = TRUE))]
+  #       
+  #       intint <- paste0(cell_types[jj], ":interaction ", tf.scores[[jj]]$tf, "=", all_ligands[ii])
+  #       
+  #       idx1 <- which(var_exp==paste0(cell_types[jj], ":node ", all_ligands[ii]))
+  #       idx2 <- which(var_exp %in% intint)
+  #       
+  #       
+  #       if((length(idx1)==1) && (length(idx2) > 0)){
+  #         cc3 <- c(cc3, paste0(var[idx1], " - ", paste0(var[idx2], collapse = " - "), " <= 0"))
+  #         cc4 <- c(cc4, paste0(var[idx1], " - ", var[idx2], " >= 0"))
+  #       }
+  #       
+  #     }
+  #     
+  #   }
+  #   
+  # }
   
   # Constraints 5c
   cc5 <- vector("list", length(all_ligands))
@@ -87,7 +87,8 @@ write_constraints_5 <- function(variables = variables,
     interaction_idxs <- which(grepl(interaction_exprs, variables$var_exp))
     
     if (length(interaction_idxs) > 0) {
-      cc5[[ii]] <- paste0(variables$var[interaction_idxs], " - ", ligand_var, " <= 0")
+      cc5[[ii]] <- c(paste0(variables$var[interaction_idxs], " - ", ligand_var, " <= 0"),
+                     paste0(ligand_var, " - ", paste0(variables$var[interaction_idxs], collapse = " - "), " <= 0"))
     }
   }
   

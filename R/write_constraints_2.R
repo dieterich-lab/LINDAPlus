@@ -16,6 +16,14 @@ write_constraints_2 <- function(variables = variables,
     interaction_mask <- grepl("interaction ", var_exp, fixed = TRUE)
     interaction_vars <- var[interaction_mask]
     interaction_exps <- var_exp[interaction_mask]
+    lr2rem <- background.networks.list$background.networks[[cell]]
+    lr2rem <- paste0("interaction ", 
+                     lr2rem$gene_source[which(lr2rem$pfam_source=="PSEUDODOMAINLR")], 
+                     "=", 
+                     lr2rem$gene_target[which(lr2rem$pfam_source=="PSEUDODOMAINLR")])
+    ind2rem <- which(interaction_exps%in%lr2rem)
+    interaction_exps <- interaction_exps[-ind2rem]
+    interaction_vars <- interaction_vars[-ind2rem]
     interactions <- sub("interaction ", "", interaction_exps, fixed = TRUE)
     interactions_split <- strsplit(interactions, "=")
     ss <- sapply(interactions_split, '[', 1)
@@ -23,6 +31,11 @@ write_constraints_2 <- function(variables = variables,
     
     node_ss <- paste0("node ", ss)
     node_tt <- paste0("node ", tt)
+    # ind2rem <- which(tt%in%background.networks.list$ligands.receptors$ligands)
+    # if(length(ind2rem) > 0){
+    #   node_ss <- node_ss[-ind2rem]
+    #   node_tt <- node_tt[-ind2rem]
+    # }
     node_ss_idx <- match(node_ss, var_exp)
     node_tt_idx <- match(node_tt, var_exp)
     
@@ -33,6 +46,18 @@ write_constraints_2 <- function(variables = variables,
     reaction_mask <- grepl("reaction ", var_exp, fixed = TRUE)
     reaction_vars <- var[reaction_mask]
     reaction_exps <- var_exp[reaction_mask]
+    lr2rem <- background.networks.list$background.networks[[cell]]
+    lr2rem <- paste0(lr2rem$gene_source[which(lr2rem$pfam_source=="PSEUDODOMAINLR")], 
+                     "=", 
+                     lr2rem$gene_target[which(lr2rem$pfam_source=="PSEUDODOMAINLR")])
+    lr2rem <- unique(lr2rem)
+    ind2rem <- c()
+    for(zz in 1:length(lr2rem)){
+      ind2rem <- c(ind2rem, which(grepl(pattern = lr2rem[zz], x = reaction_exps, fixed = TRUE)))
+    }
+    ind2rem <- unique(ind2rem)
+    reaction_exps <- reaction_exps[-ind2rem]
+    reaction_vars <- reaction_vars[-ind2rem]
     reaction_details <- strsplit(reaction_exps, " ")
     ddi <- sapply(reaction_details, '[', 2)
     ppi <- sapply(reaction_details, '[', 4)

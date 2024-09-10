@@ -93,6 +93,25 @@ prepare_linda_inputs <- function(interactions_df = interactions_df,
     interactions_df <- interactions_df[-idxdup2rem, ]
   }
   
+  ## Now prune ligands that are no TF targets
+  ind1 <- intersect(x = which(is.na(interactions_df$pfam_source)), 
+                    y = which(is.na(interactions_df$pfam_target)))
+  ind2 <- intersect(x = which(is.na(interactions_df$pfam_source)), 
+                    y = which(!is.na(interactions_df$pfam_target)))
+  presLig <- unique(interactions_df$gene_target[ind1])
+  lig2rem <- setdiff(x = presLig, y = ligands)
+  if(length(lig2rem) > 0){
+    interactions_df <- interactions_df[-which(interactions_df$gene_target%in%lig2rem), ]
+  }
+  presLig <- unique(interactions_df$gene_source[ind2])
+  lig2rem <- setdiff(x = presLig, y = ligands)
+  if(length(lig2rem) > 0){
+    interactions_df <- interactions_df[-which(interactions_df$gene_source%in%lig2rem), ]
+  }
+  
+  
+  
+  
   ## Prepare interactions for each cell-type
   if((class(cell_types) != "character") && (!is.null(cell_types))){
     stop("Object 'cell_type' should be a character vector containing the names

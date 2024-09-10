@@ -11,60 +11,93 @@
 #'b)ligand.receptors: This also should be a named list ('ligands' and Receptors') 
 #'which contains character vectors where the set of elements that 
 #'corresponds to Ligands and Receptors have been defined as such.
+#'For the LINDA+ analysis, users should at the least provide the 'background.networks.list' 
+#'as an input and either 'ccc.input' or 'tf.input' objects (see below).
 #'
+#'@param ccc.input A data-frame object containing information about how cells
+#'communicate with each other. Such information can be obtained by using various
+#'methods of cell-cell communication analysis and the data-frame should contain
+#'the following columns: transmitter_cell (indicating the cell-type which 
+#'releases the ligands), receiver_cell (cell-type which receives the signal),
+#'ligand (the gene symbol ID of the ligand which has been released by the
+#'transmitter) and receptor (the gene symbol ID of the receptor that has been
+#'perturbed by the ligand in the receiving cell-type).
 #'
-#'@param ligand.scores Users can provide information about the abundance of 
-#'ligands in the extra-cellular space as made evident by Secretomics data 
-#'through a data-frame object. More abundant ligands/extra-cellular molecules 
-#'are more likely to initiate conformational changes in receptors. The 
-#'data-frame provided should contain two columns: 'ligands' (providing the 
-#'ligand ID's) and 'score' (providing the score associated to each ligand, i.e. 
-#'abundance). The higher the score of the ligand, the more likely it will be for
-#' a ligand to appear in the solution.
-#'
-#'
-#'@param tf.scores This information should be provided as a named list (for each 
+#'@param tf.input This information should be provided as a named list (for each 
 #'cell-type) and which contains data-frames indicating the enrichment scores for 
 #'each TF at each cell-type. The data-frames should contain at least two 
-#'columns: 'tf' (indicating the TF ID) and the numerical 'score' (indicating the
-#' enrichment scores for each TF).
+#'columns: 'tf' (indicating the TF ID) and the numerical 'score' (indicating the 
+#'enrichment scores for each TF).
+#'
+#'@param top.tf A named numerical vector defining how many TF's should be 
+#'considered as significantly enriched for each of the tables provided in the 
+#'tf.scores input. The names of the elements in the vector should correspond to 
+#'the desired cell-types. By default, top.tf = NULL, in which case all the TF's 
+#'given in the tf.scores list across each cell-type willbe considered as 
+#'significantly enriched.
+#'
+#'@param ligand.scores (optional) Users can provide information about the 
+#'abundance of ligands in the extra-cellular space as made evident by 
+#'Secretomics data through a data-frame object. More abundant 
+#'ligands/extra-cellular molecules are more likely to initiate conformational 
+#'changes in receptors. The data-frame provided should contain two columns: 
+#''ligands' (providing the ligand ID's) and 'score' (providing the score 
+#'associated to each ligand, i.e. abundance. This should be normalized between 0 
+#'and 1). The higher the score of the ligand, the more likely it will be for a 
+#'ligand to appear in the solution.
+#'
+#'
+#'@param ccc.prob (optional) A data-frame object which should contain two 
+#'columns: 'ccc' (providing pairs of interacting cell-types, i.e. "CellA=CellB" 
+#'for the case when CellA communicates with CellB) and 'score' (providing the 
+#'score associated to each communicating cell pair). The scores should be 
+#'provided between 0 and 1 and the higher the score a cell-cell interaction, the 
+#'more likely it will be for the source cell-type to communicate to the target 
+#'cell-type. A score of 0, means that the defined source cell-type will not talk 
+#'to the defined target cell-type.
 #' 
-#' 
-#' #'@param top (optional) Users can provide a named (also by cell-type) 
-#' numerical vector to indicate the number of TF's to consider as significantly 
-#' regulated based on their absolute enrichment values. In case that this 
-#' parameter has not been defined, then by default all the TF's provided in the 
-#' data-frames list will be considered as significantly regulated.
+#'@param as.input (optional) A data-frame object which should contain four 
+#'columns: 'cell_type' (defining the cell-type in which the splicing effect is 
+#'happening), 'proteinID' (defining the name of the protein affected by 
+#'splicing), 'domainID' (defining the PFAM identifier of the protein domain that 
+#'has been affected by splicing) and 'effect' (defining the type of effect that 
+#'the alternative splicing has on this specific domain: either exclusion or 
+#'inclusion). In the case of exclusion effect, the corresponding domain will be 
+#'conidered as skipped and not involved in any of the domain interactions. In 
+#'the case of inclusion, the defined domain will be present in the solution as 
+#'an interactor.
 #'
+#'@param solverPath (optional) Here is provided the location path to the desired 
+#'solver. By default, the path to the cplex solver is set to: 
+#'solverPath = "/usr/bin/cplex".
 #'
-#'@param solverPath (optional) location path to the desired solver. By default,
-#'the path to the cplex solver is set to: solverPath = "/usr/bin/cplex".
+#'@param lambda1 A numerical value representing the penalization term of the 
+#'first part of the primary objective of the objective function - Ligand 
+#'secretion from the transmitter cell. By default, lambda1=10.
 #'
+#'@param lambda2 A numerical value representing the penalization term of the 
+#'second part of the primary objective of the objective function - 
+#'Ligand-Receptor interaction in the receiver cell. By default, lambda2=1.
 #'
-#'@param alpha the penalization term of the primary objective of the objective
-#'function - TF inclusion. This penalty factor is suggested to be set to a
-#'higher value compared to other penalty parameters in order to strongly
-#'penalize the inclusion of not signifcantly regulated TF's. By default,
-#'alpha=10.
+#'@param lambda3 A numerical value representing the penalization term of the 
+#'primary objective of the objective function - TF inclusion. This penalty 
+#'factor is suggested to be set to a higher value compared to other penalty 
+#'parameters in order to strongly penalize the inclusion of not signifcantly 
+#'regulated TF's. By default, lambda3=10.
 #'
+#'@param lambda4 A numerical value representing the penalization term of the 
+#'a secondary objective of the objective function - Ligand inclusion scores as
+#'given in the ligand.scores object. By default, lambda4=5.
 #'
-#'@param beta the penalization terms of the secondary objective of the
+#'@param lambda5 the penalization terms of the final objective of the
 #'objective function - size penalty. The aim of this objective term is to
 #'penalize the inclusion of spurious DDI's in the final solution. By default,
-#'beta=5.
-#'
-#'
-#'@param gamma the penalization terms of the secondary objective of the
-#'objective function - size penalty. The aim of this objective term is to
-#'penalize the inclusion of spurious DDI's in the final solution. By default,
-#'gamma=0.1.
-#'
+#'lambda5=0.1.
 #'
 #'@param mipgap CPLEX parameter which sets an absolute tolerance on the gap
 #'between the best integer objective and the objective of the best node
 #'remaining. When this difference falls below the value of this parameter, the
 #'mixed integer optimization is stopped. By default, mipgap=0.
-#'
 #'
 #'@param relgap CPLEX parameter which sets a relative tolerance on the objective
 #'value for the solutions in the solution pool. Solutions that are worse (either
@@ -74,20 +107,16 @@
 #'worse than the incumbent by 0.1 percent or more will be discarded. By default,
 #'relgap=0.
 #'
-#'
 #'@param populate CPLEX parameter which sets the maximum number of mixed integer
 #'programming (MIP) solutions generated for the solution pool during each call
 #'to the populate procedure. Populate stops when it has generated the amount of
 #'solutions set in this parameter. By default, populate=500.
 #'
-#'
 #'@param nSolutions the number of solutions to be provided by LINDA. By default,
 #'nSolutions=100.
 #'
-#'
 #'@param timelimit CPLEX parameter which sets the maximum optimization time in
 #'seconds. By default, timelimit=3600.
-#'
 #'
 #'@param intensity CPLEX parameter which controls the trade-off between the
 #'number of solutions generated for the solution pool and the amount of time or
@@ -96,7 +125,6 @@
 #'memory but are likely to yield more solutions. By default, intensity=0 (let
 #'CPLEX choose). By default, intensity=1.
 #'
-#'
 #'@param replace CPLEX parameter which designates the strategy for replacing a
 #'solution in the solution pool when the solution pool has reached its capacity.
 #'The value 0 replaces solutions according to a first-in, first-out policy. The
@@ -104,18 +132,15 @@
 #'replaces solutions in order to build a set of diverse solutions. By default,
 #'replace=1.
 #'
-#'
 #'@param threads CPLEX parameter which manage the number of threads that CPLEX
 #'uses. By default, threads=0 (let CPLEX decide). The number of threads that
 #'CPLEX uses is no more than the number of CPU cores available on the computer
 #'where CPLEX is running.
 #'
-#'
 #'@param condition a parameter which can be used in the case when LINDA is
 #'desirde to run over multiple analyses in parallel. It is useful to distinguish
 #'between the multiple ILP problems defined for each case as well as the
 #'solutions obtained. By default, conditions=1.
-#'
 #'
 #' @return Results list containing each of the LINDA unique solutions as well as
 #' the combined ones.
@@ -138,17 +163,18 @@
 #' @export
 
 runLINDAPlus <- function(background.networks.list = background.networks.list,
-                         tf.scores = tf.scores,
-                         lr.scores = NULL,
+                         ccc.input = NULL,
+                         tf.input = NULL,
+                         top.tf = NULL,
                          ligand.scores = NULL,
-                         ccc.scores = NULL,
+                         ccc.prob = NULL,
                          as.input = NULL,
                          solverPath = "/usr/bin/cplex",
-                         top.tf = NULL,
                          lambda1 = 10,
-                         lambda2 = 15,
-                         lambda3 = 1,
-                         lambda4 = 0.1,
+                         lambda2 = 1,
+                         lambda3 = 10,
+                         lambda4 = 5,
+                         lambda5 = 0.1,
                          mipgap = 0,
                          relgap = 0,
                          populate = 500,
@@ -162,18 +188,22 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   
   options(scipen=999)
   
+  print("LINDA analysis start !!")
+  print("Now checking all the inputs")
+  
   all_inputs <- checkInputs(background.networks.list = background.networks.list,
+                            ccc.input = ccc.input,
+                            tf.input = tf.input,
+                            top.tf = top.tf,
                             ligand.scores = ligand.scores,
-                            tf.scores = tf.scores,
-                            lr.scores = lr.scores,
-                            solverPath = solverPath,
-                            top.tf = top.tf, 
-                            ccc.scores = ccc.scores,
+                            ccc.prob = ccc.prob,
                             as.input = as.input,
+                            solverPath = solverPath,
                             lambda1 = lambda1,
-                            lambda2 = lambda2, 
-                            lambda3 = lambda3, 
+                            lambda2 = lambda2,
+                            lambda3 = lambda3,
                             lambda4 = lambda4,
+                            lambda5 = lambda5,
                             mipgap = mipgap,
                             relgap = relgap,
                             populate = populate,
@@ -187,17 +217,18 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   
   
   background.networks.list <- all_inputs$background.networks.list
-  tf.scores <- all_inputs$tf.scores
-  lr.scores <- all_inputs$lr.scores
+  ccc.input <- all_inputs$ccc.input
+  tf.input <- all_inputs$tf.input
+  top.tf <- all_inputs$top.tf
   ligand.scores <- all_inputs$ligand.scores
-  ccc.scores <- all_inputs$ccc.scores
+  ccc.prob <- all_inputs$ccc.prob
   as.input <- all_inputs$as.input
   solverPath <- all_inputs$solverPath
-  top.tf <- all_inputs$top.tf
   lambda1 <- all_inputs$lambda1
   lambda2 <- all_inputs$lambda2
   lambda3 <- all_inputs$lambda3
   lambda4 <- all_inputs$lambda4
+  lambda5 <- all_inputs$lambda5
   mipgap <- all_inputs$mipgap
   relgap <- all_inputs$relgap
   populate <- all_inputs$populate
@@ -209,18 +240,25 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   condition <- all_inputs$condition
   save_res <- all_inputs$save_res
   
+  print("Checking of all the inputs: Done! Now processing background network...")
+  
   
   background.networks.list <- process_background_network(background.networks.list = background.networks.list, 
-                                                         tf.scores = tf.scores, lr.scores = lr.scores, ccc.scores = ccc.scores)
+                                                         tf.input = tf.input, ccc.input = ccc.input, ccc.prob = ccc.prob)
+  
+  print("Processing the background network: Done! Now creating all the variables...")
+  
   variables <- create_variables(background.networks.list = background.networks.list)
   
-  res <- computeILP(variables = variables, background.networks.list = background.networks.list, 
-                    tf.scores = tf.scores, ligand.scores = ligand.scores, lr.scores = lr.scores, 
-                    ccc.scores = ccc.scores, as.input = as.input, lambda1 = lambda1, 
-                    lambda2 = lambda2, lambda3 = lambda3, lambda4 = lambda4, condition = condition, 
-                    solverPath = solverPath, mipgap = mipgap, relgap = relgap, intensity = intensity, 
-                    populate = populate, nSolutions = nSolutions, replace = replace, threads = threads, 
-                    timelimit = timelimit)
+  print("Writing of all the variables: Done! Now writing the objective function...")
+  
+  res <- computeILP(variables = variables, background.networks.list = background.networks.list,
+                    ccc.input = ccc.input, tf.input = tf.input, ligand.scores = ligand.scores,
+                    ccc.prob = ccc.prob, as.input = as.input, solverPath = solverPath,
+                    lambda1 = lambda1, lambda2 = lambda2, lambda3 = lambda3, lambda4 = lambda4,
+                    mipgap = mipgap,  relgap = relgap, populate = populate, nSolutions = nSolutions,
+                    timelimit = timelimit, intensity = intensity, replace = replace, threads = threads,
+                    condition = condition, save_res = save_res, lambda5 = lambda5)
   
   if(save_res){
     save(res, file = paste0("res_", condition, ".RData"))

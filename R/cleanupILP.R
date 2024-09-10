@@ -20,9 +20,9 @@ cleanupILP <- function(condition=condition){
     file.remove(paste0("solution_", condition, ".csv"))
   }
   
-  if(file.exists(paste0("all_constraints_", condition, ".RData"))){
-    file.remove(paste0("all_constraints_", condition, ".RData"))
-  }
+  # if(file.exists(paste0("all_constraints_", condition, ".RData"))){
+  #   file.remove(paste0("all_constraints_", condition, ".RData"))
+  # }
   
   AllFiles <- list.files()
   CloneFiles <- intersect(x = which(grepl(pattern = "clone",x = AllFiles,fixed = TRUE)), 
