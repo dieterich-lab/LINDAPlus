@@ -132,4 +132,3 @@ create_variables <- function(background.networks.list = background.networks.list
   return(variables)
   
 }
-

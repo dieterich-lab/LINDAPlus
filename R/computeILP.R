@@ -1,74 +1,87 @@
-computeILP <- function(variables = variables, 
-                       background.networks.list = background.networks.list, 
-                       tf.scores = tf.scores, 
+computeILP <- function(variables = variables,
+                       background.networks.list = background.networks.list,
+                       ccc.input = ccc.input,
+                       tf.input = tf.input,
                        ligand.scores = ligand.scores,
-                       lr.scores = lr.scores,
-                       ccc.scores = ccc.scores,
+                       ccc.prob = ccc.prob,
                        as.input = as.input,
-                       lambda1 = lambda1, 
-                       lambda2 = lambda2, 
+                       solverPath = solverPath,
+                       lambda1 = lambda1,
+                       lambda2 = lambda2,
                        lambda3 = lambda3,
                        lambda4 = lambda4,
-                       condition = condition,
-                       solverPath = solverPath,
                        mipgap = mipgap,
                        relgap = relgap,
-                       intensity = intensity,
                        populate = populate,
                        nSolutions = nSolutions,
+                       timelimit = timelimit,
+                       intensity = intensity,
                        replace = replace,
                        threads = threads,
-                       timelimit = timelimit){
+                       condition = condition,
+                       save_res = save_res,
+                       lambda5 = lambda5){
   
   objective.function <- write_objective_function(variables = variables, 
                                                  background.networks.list = background.networks.list, 
-                                                 tf.scores = tf.scores, 
+                                                 ccc.input = ccc.input,
+                                                 tf.input = tf.input,
                                                  ligand.scores = ligand.scores,
-                                                 lr.scores = lr.scores,
-                                                 ccc.scores = ccc.scores,
+                                                 ccc.prob = ccc.prob,
                                                  lambda1 = lambda1, 
                                                  lambda2 = lambda2, 
                                                  lambda3 = lambda3,
-                                                 lambda4 = lambda4)
+                                                 lambda4 = lambda4,
+                                                 lambda5 = lambda5)
   print("Writing of the Objective Function: Done! Now writing constraints...")
   
+  print("Writing of the constraints, step 1/11...")
   c1 <- c(write_constraints_1a(variables = variables, 
                                background.networks.list = background.networks.list),
           write_constraints_1b(variables = variables, 
                                background.networks.list = background.networks.list))
-  print("Writing of the constraints, step 1/11: Done!")
+  print("Writing of the constraints, step 2/11...")
   c2 <- write_constraints_2(variables = variables, 
                             background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 2/11: Done!")
-  c3 <- write_constraints_3(variables = variables, 
-                            background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 3/11: Done!")
+  print("Writing of the constraints, step 3/11...")
+  if(is.null(ccc.input)){
+    c3 <- write_constraints_3b(variables = variables, 
+                               background.networks.list = background.networks.list)
+  } else {
+    c3 <- write_constraints_3a(variables = variables, 
+                               background.networks.list = background.networks.list)
+  }
+  print("Writing of the constraints, step 4/11...")
   c4 <- write_constraints_4(variables = variables, 
                             background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 4/11: Done!")
-  c5 <- write_constraints_5(variables = variables, 
-                            background.networks.list = background.networks.list, 
-                            tf.scores = tf.scores)
-  print("Writing of the constraints, step 5/11: Done!")
+  print("Writing of the constraints, step 5/11...")
+  if(is.null(tf.input)){
+    c5 <- write_constraints_5b(variables = variables, 
+                               background.networks.list = background.networks.list)
+  } else {
+    c5 <- write_constraints_5a(variables = variables, 
+                               background.networks.list = background.networks.list, 
+                               tf.input = tf.input)
+  }
+  print("Writing of the constraints, step 6/11...")
   c6 <- write_constraints_6(variables = variables, 
                             background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 6/11: Done!")
+  print("Writing of the constraints, step 7/11...")
   c7 <- write_constraints_7(variables = variables, 
                             background.networks.list = background.networks.list, 
                             as.input = as.input)
-  print("Writing of the constraints, step 7/11: Done!")
+  print("Writing of the constraints, step 8/11...")
   c8 <- write_constraints_8(variables = variables, 
                             background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 8/11: Done!")
+  print("Writing of the constraints, step 9/11...")
   c9 <- write_constraints_9(variables = variables,
                             background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 9/11: Done!")
+  print("Writing of the constraints, step 10/11...")
   c10 <- write_loop_constraints(variables = variables, 
                                 background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 10/11: Done!")
+  print("Writing of the constraints, step 11/11...")
   c11 <- write_ligand_control_constraints(variables = variables, 
                                           background.networks.list = background.networks.list)
-  print("Writing of the constraints, step 11/11: Done!")
   allC <- unique(c(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11))
   # save(allC, file = paste0("all_constraints_", condition, ".RData"))
   
@@ -107,18 +120,18 @@ computeILP <- function(variables = variables,
         append = TRUE)
   write("quit", data2, append = TRUE)
   
-  print("Writing of the ILP problem: Done! Now solving the ILP problem with CPLEX...")
+  print("Writing of the ILP problem: Done! Now solving the ILP problem with CPLEX.")
   solve_with_cplex(solverPath = solverPath, variables = variables,
                    condition = condition)
   
   print("Problem solving: Done! Now retreiving all the results (final step)...")
   sif <- read_solution_cplex(variables = variables,
                              background.networks.list = background.networks.list,
-                             tf.scores = tf.scores,
+                             tf.input = tf.input,
                              condition = condition)
   
   cleanupILP(condition = condition)
-  print("Results have been retreived and all the auxiliary CPLEX files have been cleared up...")
+  print("Results have been retreived and all the auxiliary CPLEX files have been cleared up!")
   
   return(sif)
   

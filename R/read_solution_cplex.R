@@ -1,7 +1,29 @@
 read_solution_cplex <- function(variables = variables,
                                 background.networks.list = background.networks.list,
-                                tf.scores = tf.scores,
+                                tf.input = tf.input,
                                 condition = 1){
+  
+  if(is.null(tf.input)){
+    
+    tf.input <- list()
+    for(ii in 1:length(background.networks.list$background.networks)){
+      
+      bn <- background.networks.list$background.networks[[ii]]
+      tf <- unique(bn$gene_source[which(bn$pfam_source == "PSEUDODOMAINTF")])
+      
+      curr <- matrix(data = , nrow = length(tf), ncol = 2)
+      curr[, 1] <- tf
+      curr[, 2] <- 0
+      colnames(curr) <- c("tf", "score")
+      curr <- as.data.frame(curr)
+      curr$score <- as.numeric(curr$score)
+      
+      tf.input[[length(tf.input)+1]] <- curr
+      
+    }
+    names(tf.input) <- names(background.networks.list$background.networks)
+    
+  }
   
   ## Network
   cplexSolutionFileName <- paste0("results_", condition, ".txt")
@@ -162,8 +184,8 @@ read_solution_cplex <- function(variables = variables,
   
   ## Attributes
   allTF <- c()
-  for(ii in 1:length(tf.scores)){
-    allTF <- c(allTF, tf.scores[[ii]]$tf)
+  for(ii in 1:length(tf.input)){
+    allTF <- c(allTF, tf.input[[ii]]$tf)
   }
   allTF <- unique(allTF)
   
