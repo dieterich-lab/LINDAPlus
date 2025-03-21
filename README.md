@@ -1,5 +1,5 @@
 # LINDA+
-This repository contains the scripts for the ILP (Integer Linear Programming) implementation of the LINDA+ R package and accompanying scripts that implement the method. ILP is a mathematical optimisation algorithm in which the objective function and constraints are linear and the variables are integers.
+This repository contains the scripts for the ILP (Integer Linear Programming) implementation of the LINDA+ R package and accompanying scripts that implement the method. ILP is a mathematical optimisation algorithm in which the objective function and constraints are linear and the variables are integers. The dedicated documentation page of LINDA+ which describes the inputs and the outputs as well as tutorials has been provided [here](https://enio23.github.io/lindaplus-docs/).
 
 ### License
 
