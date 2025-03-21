@@ -20,6 +20,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
                         replace = replace,
                         threads = threads,
                         condition = condition,
+                        constraits.parallel.writing = constraits.parallel.writing,
                         save_res = save_res){ 
   
   #### background.networks.list
@@ -500,6 +501,14 @@ checkInputs <- function(background.networks.list = background.networks.list,
   }
   
   
+  #### constraits.parallel.writing
+  if(class(constraits.parallel.writing) != "logical"){
+    
+    warning("The 'constraits.parallel.writing' parameter should take a logical TRUE/FALSE value. We are setting it to it's default FALSE value.")
+    constraits.parallel.writing <- FALSE
+    
+  }
+  
   
   #### Now do the return object
   all_inputs <- list()
@@ -525,9 +534,8 @@ checkInputs <- function(background.networks.list = background.networks.list,
   all_inputs$replace = replace
   all_inputs$threads = threads
   all_inputs$condition = condition
+  all_inputs$constraits.parallel.writing = constraits.parallel.writing
   all_inputs$save_res = save_res
-  
-  return(all_inputs)
   
   return(all_inputs)
   

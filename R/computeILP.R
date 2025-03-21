@@ -20,6 +20,7 @@ computeILP <- function(variables = variables,
                        threads = threads,
                        condition = condition,
                        save_res = save_res,
+                       constraits.parallel.writing = constraits.parallel.writing,
                        lambda5 = lambda5){
   
   objective.function <- write_objective_function(variables = variables, 
@@ -37,7 +38,8 @@ computeILP <- function(variables = variables,
   
   print("Writing of the constraints, step 1/11...")
   c1 <- c(write_constraints_1a(variables = variables, 
-                               background.networks.list = background.networks.list),
+                               background.networks.list = background.networks.list, 
+                               constraits.parallel.writing = constraits.parallel.writing),
           write_constraints_1b(variables = variables, 
                                background.networks.list = background.networks.list))
   print("Writing of the constraints, step 2/11...")
@@ -46,26 +48,32 @@ computeILP <- function(variables = variables,
   print("Writing of the constraints, step 3/11...")
   if(is.null(ccc.input)){
     c3 <- write_constraints_3b(variables = variables, 
-                               background.networks.list = background.networks.list)
+                               background.networks.list = background.networks.list, 
+                               constraits.parallel.writing = constraits.parallel.writing)
   } else {
     c3 <- write_constraints_3a(variables = variables, 
-                               background.networks.list = background.networks.list)
+                               background.networks.list = background.networks.list, 
+                               constraits.parallel.writing = constraits.parallel.writing)
   }
   print("Writing of the constraints, step 4/11...")
   c4 <- write_constraints_4(variables = variables, 
-                            background.networks.list = background.networks.list)
+                            background.networks.list = background.networks.list, 
+                            constraits.parallel.writing = constraits.parallel.writing)
   print("Writing of the constraints, step 5/11...")
   if(is.null(tf.input)){
     c5 <- write_constraints_5b(variables = variables, 
-                               background.networks.list = background.networks.list)
+                               background.networks.list = background.networks.list, 
+                               constraits.parallel.writing = constraits.parallel.writing)
   } else {
     c5 <- write_constraints_5a(variables = variables, 
                                background.networks.list = background.networks.list, 
-                               tf.input = tf.input)
+                               tf.input = tf.input, 
+                               constraits.parallel.writing = constraits.parallel.writing)
   }
   print("Writing of the constraints, step 6/11...")
   c6 <- write_constraints_6(variables = variables, 
-                            background.networks.list = background.networks.list)
+                            background.networks.list = background.networks.list, 
+                            constraits.parallel.writing = constraits.parallel.writing)
   print("Writing of the constraints, step 7/11...")
   c7 <- write_constraints_7(variables = variables, 
                             background.networks.list = background.networks.list, 
@@ -78,7 +86,8 @@ computeILP <- function(variables = variables,
                             background.networks.list = background.networks.list)
   print("Writing of the constraints, step 10/11...")
   c10 <- write_loop_constraints(variables = variables, 
-                                background.networks.list = background.networks.list)
+                                background.networks.list = background.networks.list,
+                                constraits.parallel.writing = constraits.parallel.writing)
   print("Writing of the constraints, step 11/11...")
   c11 <- write_ligand_control_constraints(variables = variables, 
                                           background.networks.list = background.networks.list)

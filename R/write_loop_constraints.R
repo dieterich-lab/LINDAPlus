@@ -1,5 +1,6 @@
 write_loop_constraints <- function(variables = variables,
-                                   background.networks.list = background.networks.list){
+                                   background.networks.list = background.networks.list,
+                                   constraits.parallel.writing = constraits.parallel.writing) {
   
   ligands <- background.networks.list$ligands.receptors$ligands
   receptors <- background.networks.list$ligands.receptors$receptors
@@ -8,9 +9,7 @@ write_loop_constraints <- function(variables = variables,
   lr <- variables$var_exp[grepl("LR:interaction ", variables$var_exp, fixed = TRUE)]
   lr <- sapply(strsplit(lr, " "), function(x) x[2])
   
-  constraints <- vector("list", length(cells))
-  
-  for (ii in seq_along(cells)) {
+  process_cell_constraints <- function(ii) {
     background.network <- background.networks.list$background.networks[[ii]]
     sif <- unique(background.network[, c("gene_source", "gene_target")])
     lr_mask <- paste0(sif[, 1], "=", sif[, 2]) %in% lr
@@ -40,9 +39,14 @@ write_loop_constraints <- function(variables = variables,
                         -(1 - 10001))
     }
     
-    constraints[[ii]] <- unique(c(cc1, cc2, cc3))
+    return(unique(c(cc1, cc2, cc3)))
   }
   
-  # Flatten the constraints list to return a single vector
-  return(unlist(constraints))
+  if (constraits.parallel.writing) {
+    constraints_list <- mclapply(seq_along(cells), process_cell_constraints, mc.cores = length(cells))
+  } else {
+    constraints_list <- lapply(seq_along(cells), process_cell_constraints)
+  }
+  
+  return(unlist(constraints_list))
 }
