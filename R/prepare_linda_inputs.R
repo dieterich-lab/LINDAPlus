@@ -156,7 +156,7 @@ prepare_linda_inputs <- function(interactions_df = interactions_df,
         if(length(lig_idx) > 0){
           for(jj in 1:length(lig_idx)){
             if(all(strsplit(x = curr$gene_source[lig_idx[jj]], split = "|", fixed = TRUE)[[1]]%in%genes2keep[[ii]])){
-              tmp_idx_1 <- c(tmp_idx_1, lig_idx[jj])
+              tmp_idx_2 <- c(tmp_idx_2, lig_idx[jj])
             }
           }
         }
@@ -262,7 +262,7 @@ prepare_linda_inputs <- function(interactions_df = interactions_df,
     
     curr <- background.networks[[ii]]
     idx2rem <- which(curr$gene_source%in%rec2rem)
-    curr <- curr[-idx2rem, ]
+    if(length(idx2rem) > 0){curr <- curr[-idx2rem, ]}
     bnList[[length(bnList)+1]] <- curr
     
   }

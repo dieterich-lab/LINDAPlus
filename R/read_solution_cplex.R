@@ -232,6 +232,11 @@ read_solution_cplex <- function(variables = variables,
   
   names(res) <- c("combined_solutions", "node_attributes")
   
-  return(res)
+  if("perturbation.ligands" %in% names(background.networks.list$ligands.receptors)){
+    return(res)
+  } else {
+    res <- process_network_solutions(res = res)
+    return(res)
+  }
   
 }

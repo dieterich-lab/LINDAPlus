@@ -1,10 +1,12 @@
 write_constraints_3b <- function(variables = variables,
-                                 background.networks.list = background.networks.list){
+                                 background.networks.list = background.networks.list,
+                                 constraits.parallel.writing = constraits.parallel.writing) {
   
-  constraints <- c()
   cell_types <- names(background.networks.list$background.networks)
   
-  for (cell in cell_types) {
+  process_cell_type <- function(cell) {
+    constraints <- c()
+    
     # Filter and clean variable names for the current cell type
     cell_vars <- grepl(paste0(cell, ":"), variables$var_exp, fixed = TRUE)
     var <- variables$var[cell_vars]
@@ -16,12 +18,13 @@ write_constraints_3b <- function(variables = variables,
     node_exp <- var_exp[node_mask]
     nodes_clean <- gsub("node ", "", node_exp, fixed = TRUE)
     
-    # For each node, find all interactions where this node is the source
     cc1 <- sapply(nodes_clean, function(node) {
       interactions_mask <- grepl(paste0("interaction ", node, "="), var_exp, fixed = TRUE)
       interaction_vars <- var[interactions_mask]
       if (length(interaction_vars) > 0) {
         return(paste0(paste0(interaction_vars, collapse = " + "), " - ", var[node_mask][node == nodes_clean], " >= 0"))
+      } else {
+        return(NULL)
       }
     })
     
@@ -42,15 +45,18 @@ write_constraints_3b <- function(variables = variables,
       interaction_vars <- var[interactions_mask][interactions_second_part == node]
       if (length(interaction_vars) > 0) {
         return(paste0(paste0(interaction_vars, collapse = " + "), " - ", var[node_relevant_mask][node == node_relevant_clean], " >= 0"))
+      } else {
+        return(NULL)
       }
     })
     
     cc1 <- unique(unlist(cc1))
     cc2 <- unique(unlist(cc2))
     
+    # Filter constraints where the first term is a ligand
     tmp <- cc1[sapply(cc1, function(x) length(unlist(strsplit(x, " "))) == 5)]
     ll_exp <- paste0(cell, ":node ", background.networks.list$ligands.receptors$ligands)
-    ll_var <- variables$var[which(variables$var_exp%in%ll_exp)]
+    ll_var <- variables$var[which(variables$var_exp %in% ll_exp)]
     vec2rem <- vector("list", length(tmp))
     count <- 0
     for (ii in seq_along(tmp)) {
@@ -61,15 +67,14 @@ write_constraints_3b <- function(variables = variables,
       }
     }
     vec2rem <- unlist(vec2rem[1:count])
-
-    ind2rem <- which(cc1%in%vec2rem)
-    if(length(ind2rem) > 0){
+    
+    ind2rem <- which(cc1 %in% vec2rem)
+    if (length(ind2rem) > 0) {
       cc1 <- cc1[-ind2rem]
     }
-
+    
+    # Filter constraints where the third term is a ligand
     tmp <- cc2[sapply(cc2, function(x) length(unlist(strsplit(x, " "))) == 5)]
-    ll_exp <- paste0(cell, ":node ", background.networks.list$ligands.receptors$ligands)
-    ll_var <- variables$var[which(variables$var_exp%in%ll_exp)]
     vec2rem <- vector("list", length(tmp))
     count <- 0
     for (ii in seq_along(tmp)) {
@@ -80,16 +85,24 @@ write_constraints_3b <- function(variables = variables,
       }
     }
     vec2rem <- unlist(vec2rem[1:count])
-
-    ind2rem <- which(cc2%in%vec2rem)
-    if(length(ind2rem) > 0){
+    
+    ind2rem <- which(cc2 %in% vec2rem)
+    if (length(ind2rem) > 0) {
       cc2 <- cc2[-ind2rem]
     }
     
-    # Combine and append constraints
+    # Combine and return constraints
     constraints <- c(constraints, cc1, cc2)
+    return(constraints)
   }
   
-  return(constraints)
+  # Apply parallel or sequential processing based on the flag
+  if (constraits.parallel.writing) {
+    constraints_list <- mclapply(cell_types, process_cell_type, mc.cores = length(cell_types))
+  } else {
+    constraints_list <- lapply(cell_types, process_cell_type)
+  }
   
+  constraints <- unique(unlist(constraints_list))
+  return(constraints)
 }

@@ -142,6 +142,12 @@
 #'between the multiple ILP problems defined for each case as well as the
 #'solutions obtained. By default, conditions=1.
 #'
+#'@param constraits.parallel.writing a logical parameter which can be used to
+#'speed up the writing of constraints. If set to TRUE, constraints will be
+#'written in a parallel way for each cell-type. If set to TRUE, please make sure
+#'that you have available number of cores at least as much as the number of
+#'cell-types that you are analyzing.
+#'
 #' @return Results list containing each of the LINDA unique solutions as well as
 #' the combined ones.
 #'
@@ -184,6 +190,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                          replace = 1,
                          threads = 0,
                          condition = 1,
+                         constraits.parallel.writing = FALSE,
                          save_res = FALSE){
   
   options(scipen=999)
@@ -213,6 +220,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                             replace = replace,
                             threads = threads,
                             condition = condition,
+                            constraits.parallel.writing = constraits.parallel.writing,
                             save_res = save_res)
   
   
@@ -238,6 +246,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   replace <- all_inputs$replace
   threads <- all_inputs$threads
   condition <- all_inputs$condition
+  constraits.parallel.writing <- all_inputs$constraits.parallel.writing
   save_res <- all_inputs$save_res
   
   print("Checking of all the inputs: Done! Now processing background network...")
@@ -248,7 +257,8 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   
   print("Processing the background network: Done! Now creating all the variables...")
   
-  variables <- create_variables(background.networks.list = background.networks.list)
+  variables <- create_variables(background.networks.list = background.networks.list,
+                                constraits.parallel.writing = constraits.parallel.writing)
   
   print("Writing of all the variables: Done! Now writing the objective function...")
   
@@ -258,7 +268,8 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                     lambda1 = lambda1, lambda2 = lambda2, lambda3 = lambda3, lambda4 = lambda4,
                     mipgap = mipgap,  relgap = relgap, populate = populate, nSolutions = nSolutions,
                     timelimit = timelimit, intensity = intensity, replace = replace, threads = threads,
-                    condition = condition, save_res = save_res, lambda5 = lambda5)
+                    condition = condition, save_res = save_res, lambda5 = lambda5,
+                    constraits.parallel.writing = constraits.parallel.writing)
   
   if(save_res){
     save(res, file = paste0("res_", condition, ".RData"))
