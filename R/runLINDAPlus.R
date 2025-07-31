@@ -36,6 +36,19 @@
 #'given in the tf.scores list across each cell-type willbe considered as 
 #'significantly enriched.
 #'
+#'@param prot.input A data-frame that can be derived from scProteomics data
+#'analysis and which contains the following columns: i) cell_type: the id of the
+#'cell-type; ii) proteinID: the gene name or symbol of a given protein; iii) 
+#'effect: it can take two character values - inclusion (whether you would like
+#'to have this specific protein in the solution for the given cell-type, i.e.
+#'this protein appears to be significantly regulated in a given context) and
+#'exclusion (whether you would like to not have this specific protein in the 
+#'solution for the given cell-type, i.e. there is evidence that this protein
+#'is not active). Of couse it is not a requirement for all of the proteins in
+#'the background network to be present in this data-frame. In this case, the
+#'proteins that have not been listed will be considered equally by the
+#'objective function.
+#'
 #'@param ligand.scores (optional) Users can provide information about the 
 #'abundance of ligands in the extra-cellular space as made evident by 
 #'Secretomics data through a data-frame object. More abundant 
@@ -93,6 +106,11 @@
 #'objective function - size penalty. The aim of this objective term is to
 #'penalize the inclusion of spurious DDI's in the final solution. By default,
 #'lambda5=0.1.
+#'
+#'@param lambda6 A numerical value representing the penalization term of the
+#'first part of the primary objective of the objective function - Protein
+#'inclusion/exclusion from the solution as can be made evident from
+#'scProteomics data. By default, lambda6=10.
 #'
 #'@param mipgap CPLEX parameter which sets an absolute tolerance on the gap
 #'between the best integer objective and the objective of the best node
@@ -171,6 +189,7 @@
 runLINDAPlus <- function(background.networks.list = background.networks.list,
                          ccc.input = NULL,
                          tf.input = NULL,
+                         prot.input = NULL,
                          top.tf = NULL,
                          ligand.scores = NULL,
                          ccc.prob = NULL,
@@ -181,6 +200,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                          lambda3 = 10,
                          lambda4 = 5,
                          lambda5 = 0.1,
+                         lambda6 = 10,
                          mipgap = 0,
                          relgap = 0,
                          populate = 500,
@@ -202,6 +222,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                             ccc.input = ccc.input,
                             tf.input = tf.input,
                             top.tf = top.tf,
+                            prot.input = prot.input,
                             ligand.scores = ligand.scores,
                             ccc.prob = ccc.prob,
                             as.input = as.input,
@@ -211,6 +232,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
                             lambda3 = lambda3,
                             lambda4 = lambda4,
                             lambda5 = lambda5,
+                            lambda6 = lambda6,
                             mipgap = mipgap,
                             relgap = relgap,
                             populate = populate,
@@ -228,6 +250,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   ccc.input <- all_inputs$ccc.input
   tf.input <- all_inputs$tf.input
   top.tf <- all_inputs$top.tf
+  prot.input <- all_inputs$prot.input
   ligand.scores <- all_inputs$ligand.scores
   ccc.prob <- all_inputs$ccc.prob
   as.input <- all_inputs$as.input
@@ -237,6 +260,7 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   lambda3 <- all_inputs$lambda3
   lambda4 <- all_inputs$lambda4
   lambda5 <- all_inputs$lambda5
+  lambda6 <- all_inputs$lambda6
   mipgap <- all_inputs$mipgap
   relgap <- all_inputs$relgap
   populate <- all_inputs$populate
@@ -263,13 +287,14 @@ runLINDAPlus <- function(background.networks.list = background.networks.list,
   print("Writing of all the variables: Done! Now writing the objective function...")
   
   res <- computeILP(variables = variables, background.networks.list = background.networks.list,
-                    ccc.input = ccc.input, tf.input = tf.input, ligand.scores = ligand.scores,
-                    ccc.prob = ccc.prob, as.input = as.input, solverPath = solverPath,
-                    lambda1 = lambda1, lambda2 = lambda2, lambda3 = lambda3, lambda4 = lambda4,
-                    mipgap = mipgap,  relgap = relgap, populate = populate, nSolutions = nSolutions,
-                    timelimit = timelimit, intensity = intensity, replace = replace, threads = threads,
+                    ccc.input = ccc.input, tf.input = tf.input, prot.input = prot.input,
+                    ligand.scores = ligand.scores, ccc.prob = ccc.prob, as.input = as.input, 
+                    solverPath = solverPath, lambda1 = lambda1, lambda2 = lambda2, 
+                    lambda3 = lambda3, lambda4 = lambda4, mipgap = mipgap,  relgap = relgap, 
+                    populate = populate, nSolutions = nSolutions, timelimit = timelimit, 
+                    intensity = intensity, replace = replace, threads = threads,
                     condition = condition, save_res = save_res, lambda5 = lambda5,
-                    constraits.parallel.writing = constraits.parallel.writing)
+                    lambda6 = lambda6, constraits.parallel.writing = constraits.parallel.writing)
   
   if(save_res){
     save(res, file = paste0("res_", condition, ".RData"))

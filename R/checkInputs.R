@@ -2,6 +2,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
                         ccc.input = ccc.input,
                         tf.input = tf.input,
                         top.tf = top.tf,
+                        prot.input = prot.input,
                         ligand.scores = ligand.scores,
                         ccc.prob = ccc.prob,
                         as.input = as.input,
@@ -11,6 +12,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
                         lambda3 = lambda3,
                         lambda4 = lambda4,
                         lambda5 = lambda5,
+                        lambda6 = lambda6,
                         mipgap = mipgap,
                         relgap = relgap,
                         populate = populate,
@@ -67,12 +69,13 @@ checkInputs <- function(background.networks.list = background.networks.list,
   }
   
   
-  if(is.null(ccc.input) && is.null(tf.input)){
+  if(is.null(ccc.input) && is.null(tf.input) && is.null(prot.input)){
     
     stop("You should either provide a table of lignand-receptor interaction of
          cell-cell commuincation or a list of tables of TF score enrichments
-         for each cell-type. Please check your inputs or refer to the tutorials
-         about how to format your inputs.")
+         for each cell-type or a Protein Inclusion data-frame. 
+         Please check your inputs or refer to the tutorials about how to format 
+         your inputs.")
     
   }
   
@@ -195,6 +198,30 @@ checkInputs <- function(background.networks.list = background.networks.list,
       
     }
     
+  }
+  
+  
+  #### prot.input
+  if(!is.null(prot.input)){
+    
+    if(class(prot.input) != "data.frame"){
+      
+      stop("The 'prot.input' should be a data-frame object with column names 'cell_type', 'proteinID' and 'effect' where the effect values
+           should be either inclusion or exclusion. Please check your inputs. NOTE: If you are using 'prot.input' as an input, you do not have
+           to provide information about all the proteins in the background network. In this case, the proteins that are missing in the data-frame
+           well be considered and penalized equally in the objective function.")
+      
+    } else {
+      
+      nn <- intersect(x = colnames(prot.input), y = c("cell_type", "proteinID", "effect"))
+      if(length(nn) < 3){
+        
+        stop("The 'ligand.scores' should be a data-frame object with column names 'cell_type', 'proteinID' and 'effect' where the effect values
+           should be either inclusion or exclusion. Please check your inputs.")
+        
+      }
+      
+    }
   }
   
   
@@ -421,6 +448,13 @@ checkInputs <- function(background.networks.list = background.networks.list,
     
   }
   
+  if(!is.numeric(lambda6)){
+    
+    warning("The 'lambda6' parameter should be numeric. We are setting to the default lambda6=10.")
+    lambda6 <- 10
+    
+  }
+  
   
   
   #### CPLEX params
@@ -516,6 +550,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
   all_inputs$ccc.input = ccc.input
   all_inputs$tf.input = tf.input
   all_inputs$top.tf = top.tf
+  all_inputs$prot.input = prot.input
   all_inputs$ligand.scores = ligand.scores
   all_inputs$ccc.prob = ccc.prob
   all_inputs$as.input = as.input
@@ -525,6 +560,7 @@ checkInputs <- function(background.networks.list = background.networks.list,
   all_inputs$lambda3 = lambda3
   all_inputs$lambda4 = lambda4
   all_inputs$lambda5 = lambda5
+  all_inputs$lambda6 = lambda6
   all_inputs$mipgap = mipgap
   all_inputs$relgap = relgap
   all_inputs$populate = populate

@@ -2,13 +2,15 @@ write_objective_function <- function(variables = variables,
                                      background.networks.list = background.networks.list, 
                                      ccc.input = ccc.input,
                                      tf.input = tf.input,
+                                     prot.input = prot.input,
                                      ligand.scores = ligand.scores,
                                      ccc.prob = ccc.prob,
                                      lambda1 = lambda1, 
                                      lambda2 = lambda2, 
                                      lambda3 = lambda3,
                                      lambda4 = lambda4,
-                                     lambda5 = lambda5){
+                                     lambda5 = lambda5,
+                                     lambda6 = lambda6){
   
   print("Writing the objective function and constraints. This might take a bit of time..")
   
@@ -206,43 +208,128 @@ write_objective_function <- function(variables = variables,
   
   
   
-  
-  
-  
-  #### Write last objective - size penalty factor
-  if((of1 == "") && (of4 != "")){
+  #### Fourth objective - protein inputs
+  if(is.null(prot.input)){
     
-    objective.function <- substr(x = of4, start = 2, stop = nchar(of4))
+    of5 <- ""
     
   } else {
     
-    if((of1 != "") && (of4 == "")){
+    of5 <- ""
+    
+    ind_inc <- which(prot.input$effect == "inclusion")
+    if(length(ind_inc) > 0){
       
-      objective.function <- of1
-      if(substr(x = of2, start = 1, stop = 1) == "-"){
-        objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
-      } else {
-        objective.function <- paste0(objective.function, " + ", of2)
+      for(ii in 1:length(ind_inc)){
+        
+        curr_cell <- prot.input$cell_type[ind_inc[ii]]
+        idxidx <- which(variables$var_exp == paste0(curr_cell, ":node ", prot.input$proteinID[ind_inc[ii]]))
+        if(length(idxidx) > 0){
+          
+          of5 <- paste0(of5, " - ", lambda6, " ", variables$var[idxidx])
+          
+        }
+        
       }
       
-    } else {
+    }
+    
+    ind_exc <- which(prot.input$effect == "exclusion")
+    if(length(ind_exc) > 0){
       
-      objective.function <- of1
-      if(substr(x = of2, start = 1, stop = 1) == "-"){
-        objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
-      } else {
-        objective.function <- paste0(objective.function, " + ", of2)
-      }
-      
-      if(substr(x = of4, start = 2, stop = 2) == "-"){
-        objective.function <- paste0(objective.function, " ", of4)
-      } else {
-        objective.function <- paste0(objective.function, " + ", of4)
+      for(ii in 1:length(ind_exc)){
+        
+        curr_cell <- prot.input$cell_type[ind_exc[ii]]
+        idxidx <- which(variables$var_exp == paste0(curr_cell, ":node ", prot.input$proteinID[ind_exc[ii]]))
+        if(length(idxidx) > 0){
+          
+          of5 <- paste0(of5, " + ", lambda6, " ", variables$var[idxidx])
+          
+        }
+        
       }
       
     }
     
   }
+  
+  
+  
+  
+  
+  
+  #### Write last objective - size penalty factor
+  if((of1 != "") && (of4 == "") && (of5 == "")){
+    objective.function <- of1
+    if(substr(x = of2, start = 1, stop = 1) == "-"){
+      objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
+    } else {
+      objective.function <- paste0(objective.function, " + ", of2)
+    }
+  }
+  
+  if((of1 == "") && (of4 != "") && (of5 == "")){
+    objective.function <- substr(x = of4, start = 2, stop = nchar(of4))
+  }
+  
+  if((of1 == "") && (of4 == "") && (of5 != "")){
+    objective.function <- of5
+  }
+  
+  if((of1 != "") && (of4 != "") && (of5 == "")){
+    objective.function <- of1
+    if(substr(x = of2, start = 1, stop = 1) == "-"){
+      objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
+    } else {
+      objective.function <- paste0(objective.function, " + ", of2)
+    }
+    
+    if(substr(x = of4, start = 2, stop = 2) == "-"){
+      objective.function <- paste0(objective.function, " ", of4)
+    } else {
+      objective.function <- paste0(objective.function, " + ", of4)
+    }
+  }
+  
+  if((of1 == "") && (of4 != "") && (of5 != "")){
+    objective.function <- substr(x = of4, start = 2, stop = nchar(of4))
+    if(substr(x = of2, start = 1, stop = 1) == "-"){
+      objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
+    } else {
+      objective.function <- paste0(objective.function, " + ", of2)
+    }
+    
+    objective.function <- paste0(objective.function, " ", of5)
+  }
+  
+  if((of1 != "") && (of4 == "") && (of5 != "")){
+    objective.function <- of1
+    if(substr(x = of2, start = 1, stop = 1) == "-"){
+      objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
+    } else {
+      objective.function <- paste0(objective.function, " + ", of2)
+    }
+    
+    objective.function <- paste0(objective.function, " ", of5)
+  }
+  
+  if((of1 != "") && (of4 != "") && (of5 != "")){
+    objective.function <- of1
+    if(substr(x = of2, start = 1, stop = 1) == "-"){
+      objective.function <- paste0(objective.function, " - ", substr(x = of2, start = 2, stop = nchar(of2)))
+    } else {
+      objective.function <- paste0(objective.function, " + ", of2)
+    }
+    
+    if(substr(x = of4, start = 2, stop = 2) == "-"){
+      objective.function <- paste0(objective.function, " ", of4)
+    } else {
+      objective.function <- paste0(objective.function, " + ", of4)
+    }
+    
+    objective.function <- paste0(objective.function, " ", of5)
+  }
+  
   objective.function <- gsub(pattern = "  ", replacement = " ", fixed = TRUE, x = objective.function)
   
   if(of3 != ""){
@@ -262,6 +349,12 @@ write_objective_function <- function(variables = variables,
       obj <- paste0(obj, collapse = "")
       objective.function <- paste0(objective.function, obj)
     }
+  }
+  
+  if(of5 != ""){
+    
+    objective.function <- paste0(objective.function, of5)
+    
   }
   
   return(objective.function)
